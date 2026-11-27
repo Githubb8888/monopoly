@@ -446,39 +446,122 @@
   <!-- ==================== ЭКРАН НАСТРОЙКИ ИГРЫ (ЛОББИ) ==================== -->
   <div id="setupScreen" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-[#0e0b09]/92 backdrop-blur-sm">
     <div class="parchment-card corner-ornament w-full max-w-3xl rounded-xl p-5 sm:p-8 my-auto">
-      <div class="text-center border-b border-[#8a6424]/40 pb-4 mb-5">
+      <div class="text-center border-b border-[#8a6424]/40 pb-4 mb-4">
         <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded border border-[#8a6424]/50 bg-[#e2cfa8]/70 text-[#5a4634] text-xs font-semibold uppercase tracking-widest mb-2">
           <span>Мировая Экономика</span>
           <span>•</span>
-          <span>2–7 Игроков на одном устройстве</span>
+          <span>Онлайн по всему миру и на одном экране</span>
         </div>
         <h1 class="font-historic text-2xl sm:text-4xl font-bold text-[#231911] tracking-wide">
           МОНОПОЛИЯ: ВЕЛИКИЕ ГОРОДА МИРА
         </h1>
         <p class="text-[#4a3726] text-xs sm:text-sm mt-1.5 max-w-xl mx-auto">
-          Покупайте столицы мира, проводите аукционы, заключайте сделки, стройте дома и отели и открывайте <span class="font-bold text-[#1d5753]">карточки с интересными фактами</span> о каждом городе.
+          Покупайте столицы мира, проводите аукционы, стройте дома и отели и открывайте <span class="font-bold text-[#1d5753]">карточки с интересными фактами</span> о каждом городе.
         </p>
       </div>
 
-      <!-- Выбор количества игроков -->
-      <div class="mb-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#4a3726]">Количество участников:</span>
-          <span id="playerCountLabel" class="font-historic text-lg font-bold text-[#1d5753]">4 ИГРОКА</span>
-        </div>
-        <div class="grid grid-cols-6 gap-2" id="countSelector"></div>
+      <!-- Переключатель режима: Локально / Онлайн комната -->
+      <div class="grid grid-cols-2 gap-2 mb-4 p-1 rounded-lg bg-[#e2cfa8] border border-[#8a6424]/50">
+        <button id="modeOnlineBtn" onclick="switchLobbyMode('online')" class="py-2 px-3 rounded-md font-historic font-bold text-xs sm:text-sm transition-all bg-[#2a7b76] text-[#f5ebd6] shadow">
+          🌍 ОНЛАЙН-КОМНАТА (Индонезия ↔ Душанбе)
+        </button>
+        <button id="modeLocalBtn" onclick="switchLobbyMode('local')" class="py-2 px-3 rounded-md font-historic font-bold text-xs sm:text-sm transition-all text-[#38291c]">
+          📱 НА ОДНОМ УСТРОЙСТВЕ
+        </button>
       </div>
 
-      <!-- Список игроков -->
-      <div id="playersSetupList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[42dvh] overflow-y-auto pr-1 mb-6"></div>
+      <!-- ПАНЕЛЬ ОНЛАЙН-МУЛЬТИПЛЕЕРА -->
+      <div id="onlineLobbyBlock" class="space-y-4 mb-5">
+        <div class="rounded-lg bg-[#e6d1a7]/90 border border-[#8a6424]/60 p-3.5 space-y-3">
+          <div class="flex flex-col sm:flex-row gap-3 items-center">
+            <button type="button" onclick="cycleOnlineAvatar()" title="Выбрать фишку"
+              id="onlineAvatarBtn"
+              class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-[#1b1510] text-[#f5ebd6] border-2 border-[#2a7b76]">
+              👑
+            </button>
+            <div class="flex-1 w-full">
+              <label class="block text-[10px] uppercase tracking-wider font-bold text-[#5a4634] mb-0.5">Ваше имя в игре:</label>
+              <input id="onlinePlayerName" type="text" maxlength="16" value="Путешественник"
+                class="w-full bg-[#fbf6eb] border border-[#8a6424]/60 rounded px-3 py-1.5 text-sm font-bold text-[#231911] outline-none focus:border-[#1d5753]"
+                placeholder="Введите ваше имя" />
+            </div>
+          </div>
 
-      <!-- Кнопки -->
-      <div class="flex flex-col sm:flex-row gap-3 items-center justify-between pt-2 border-t border-[#8a6424]/30">
-        <button onclick="openRulesModal()" class="hist-btn btn-bronze-outline w-full sm:w-auto px-5 py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
-          <span>📜</span> Официальные правила
+          <div id="onlineAuthStatus" class="text-[11px] font-semibold text-[#1d5753]">
+            ✅ Онлайн-режим готов! Создайте комнату или введите 5-значный код друга.
+          </div>
+
+          <!-- Выбор: создать комнату или войти по коду -->
+          <div id="onlineRoomActions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <button id="createRoomBtn" onclick="createOnlineRoom()" class="hist-btn btn-turquoise py-3 px-4 rounded-lg font-historic font-bold text-sm flex items-center justify-center gap-2">
+              <span>✨</span> СОЗДАТЬ КОМНАТУ
+            </button>
+            <div class="flex gap-1.5">
+              <input id="joinRoomCodeInput" type="text" maxlength="6" placeholder="КОД КОМНАТЫ"
+                class="w-full bg-[#fbf6eb] border border-[#8a6424] rounded-lg px-3 py-2 text-center font-historic font-bold text-base uppercase tracking-widest text-[#231911] outline-none" />
+              <button id="joinRoomBtn" onclick="joinOnlineRoom()" class="hist-btn btn-gold px-4 py-2 rounded-lg font-historic font-bold text-sm shrink-0">
+                ВОЙТИ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Зал ожидания созданной/подключённой комнаты -->
+        <div id="onlineWaitingRoom" class="hidden rounded-lg bg-[#ead7b2] border-2 border-[#2a7b76] p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#8a6424]/40 pb-2.5">
+            <div>
+              <div class="text-[10px] uppercase font-bold text-[#5a4634]">Код комнаты (отправьте друзьям в Telegram/WhatsApp):</div>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span id="displayRoomCode" class="font-historic text-2xl sm:text-3xl font-extrabold tracking-widest text-[#1d5753]">-----</span>
+                <button onclick="copyRoomCode()" class="hist-btn btn-bronze-outline px-2.5 py-1 rounded text-xs font-bold">
+                  📋 Скопировать
+                </button>
+              </div>
+            </div>
+            <button onclick="leaveOnlineRoom()" class="hist-btn btn-crimson px-3 py-1.5 rounded text-xs font-bold">
+              Выйти из комнаты
+            </button>
+          </div>
+
+          <div>
+            <div class="text-xs font-bold text-[#4a3726] mb-1.5">Участники в комнате (<span id="roomPlayersCount">1</span>/7):</div>
+            <div id="roomWaitingPlayersList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+          </div>
+
+          <div id="hostStartControls" class="pt-1">
+            <button id="startOnlineGameBtn" onclick="startOnlineGame()" class="hist-btn btn-turquoise w-full py-3 rounded-lg font-historic font-bold text-base tracking-wider">
+              🧭 НАЧАТЬ ОНЛАЙН-ИГРУ ДЛЯ ВСЕХ
+            </button>
+            <p id="waitingForHostText" class="hidden text-center text-xs font-bold text-[#5a4634] py-2">
+              ⏳ Ожидаем, когда создатель комнаты нажмёт «Начать онлайн-игру»...
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ПАНЕЛЬ ЛОКАЛЬНОЙ ИГРЫ (НА ОДНОМ ЭКРАНЕ) -->
+      <div id="localLobbyBlock" class="hidden">
+        <!-- Выбор количества игроков -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#4a3726]">Количество участников:</span>
+            <span id="playerCountLabel" class="font-historic text-lg font-bold text-[#1d5753]">4 ИГРОКА</span>
+          </div>
+          <div class="grid grid-cols-6 gap-2" id="countSelector"></div>
+        </div>
+
+        <!-- Список игроков -->
+        <div id="playersSetupList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[42dvh] overflow-y-auto pr-1 mb-6"></div>
+
+        <button onclick="startGame()" class="hist-btn btn-turquoise w-full py-3 px-6 rounded-lg font-historic font-bold text-base sm:text-lg tracking-wider flex items-center justify-center gap-2 mb-4">
+          <span>🧭</span> НАЧАТЬ ЛОКАЛЬНУЮ ИГРУ
         </button>
-        <button onclick="startGame()" class="hist-btn btn-turquoise w-full sm:flex-1 py-3 px-6 rounded-lg font-historic font-bold text-base sm:text-lg tracking-wider flex items-center justify-center gap-2">
-          <span>🧭</span> НАЧАТЬ ИГРУ
+      </div>
+
+      <!-- Кнопка правил -->
+      <div class="flex items-center justify-between pt-2 border-t border-[#8a6424]/30">
+        <button onclick="openRulesModal()" class="hist-btn btn-bronze-outline w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
+          <span>📜</span> Официальные правила
         </button>
       </div>
     </div>
@@ -538,6 +621,7 @@
           <span id="turnAvatar" class="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-[#120e0b] shrink-0">👑</span>
           <span id="turnName" class="font-historic text-xs sm:text-sm font-bold text-[#f2e6cf] truncate">Игрок 1</span>
           <span id="turnMoney" class="text-xs font-bold text-[#e2be6b] shrink-0">1500 $</span>
+          <span id="onlineRoomBadge" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#2a7b76]/40 border border-[#6ec2bc]/60 text-[#a5ebe6] shrink-0">🌍 -----</span>
         </div>
         <div class="flex items-center gap-1 shrink-0">
           <button id="fullscreenBtn" onclick="toggleFullscreen()" title="На весь экран" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
@@ -686,36 +770,35 @@
           🏛️ Продать Дома/Отели или заложить улицы
         </button>
         <button id="settleDebtBtn" onclick="confirmSettleDebt()" class="hidden hist-btn btn-turquoise w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
-          ✅ Оплатить долг и продолжить игру!
+          ✅ Оплатить долг
         </button>
         <button onclick="declareBankruptcyFromRescue()" class="hist-btn btn-crimson w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
-          🏳️ Объявить себя банкротом и выйти из игры
+          🏳️ Объявить банкротство
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== МОДАЛЬНОЕ ОКНО: КАРТОЧКА ШАНС / МИРОВОЙ ФОНД ==================== -->
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: СОБЫТИЕ (ШАНС / МИРОВОЙ ФОНД) ==================== -->
   <div id="eventCardModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
     <div class="parchment-card corner-ornament w-full max-w-md rounded-xl p-6 text-center shadow-2xl">
       <div id="eventCardIcon" class="text-4xl sm:text-5xl mb-2">📜</div>
       <div id="eventCardDeck" class="font-historic text-xs uppercase tracking-widest text-[#1d5753] font-bold mb-1">ШАНС</div>
-      <h3 id="eventCardTitle" class="font-historic text-xl sm:text-2xl font-bold text-[#231911] mb-2">ВЫГОДНЫЙ КОНТРАКТ</h3>
+      <h3 id="eventCardTitle" class="font-historic text-xl sm:text-2xl font-bold text-[#231911] mb-2">СОБЫТИЕ</h3>
       <p id="eventCardDesc" class="text-sm text-[#38291c] mb-5 leading-relaxed">Описание события...</p>
       <button onclick="closeEventCardModal()" class="hist-btn btn-gold w-full py-3 rounded-lg font-historic font-bold text-sm">
-        ПРИНЯТЬ
+        ПРОДОЛЖИТЬ
       </button>
     </div>
   </div>
 
-  <!-- ==================== МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ АКТИВАМИ (ДОМА И ОТЕЛИ) ==================== -->
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ АКТИВАМИ ==================== -->
   <div id="portfolioModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs">
     <div class="parchment-card corner-ornament w-full max-w-2xl rounded-xl p-4 sm:p-6 flex flex-col max-h-[88dvh]">
       <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-3 mb-3">
         <div>
-          <h3 class="font-historic text-lg sm:text-2xl font-bold text-[#231911]">🏛️ УПРАВЛЕНИЕ СОБСТВЕННОСТЬЮ</h3>
-          <p class="text-xs text-[#5a4634]">Стройте Дома равномерно по всей цветовой группе (до 4 Домов, затем Отель)</p>
-          <p id="bankSupplyBadge" class="text-xs font-bold text-[#1d5753] mt-0.5">В Банке осталось: 32 Дома • 12 Отелей</p>
+          <h3 class="font-historic text-lg sm:text-2xl font-bold text-[#231911]">🏛️ УПРАВЛЕНИЕ АКТИВАМИ</h3>
+          <p id="bankSupplyBadge" class="text-xs font-bold text-[#1d5753]">В Банке осталось: 32 Дома • 12 Отелей</p>
         </div>
         <button onclick="closePortfolioModal()" class="w-8 h-8 rounded-full bg-[#231911] text-[#f2e6cf] border border-[#8a6424]">✕</button>
       </div>
@@ -727,15 +810,14 @@
   <div id="rulesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xs">
     <div class="parchment-card corner-ornament w-full max-w-xl rounded-xl p-5 sm:p-6 max-h-[86dvh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-3 mb-4">
-        <h3 class="font-historic text-xl font-bold text-[#231911]">📜 ОФИЦИАЛЬНЫЕ ПРАВИЛА ИГРЫ</h3>
+        <h3 class="font-historic text-xl font-bold text-[#231911]">📜 ОФИЦИАЛЬНЫЕ ПРАВИЛА МОНОПОЛИИ</h3>
         <button onclick="closeRulesModal()" class="w-8 h-8 rounded-full bg-[#231911] text-[#f2e6cf] border border-[#8a6424]">✕</button>
       </div>
       <div class="space-y-3 text-xs sm:text-sm text-[#231911] leading-relaxed">
-        <p><strong class="text-[#1d5753]">1. Старт и движение:</strong> Каждый игрок начинает на клетке <strong>«СТАРТ»</strong> с капиталом <strong>1500 $</strong>. За каждый проход или остановку на «СТАРТЕ» Банк выплачивает <strong>+200 $</strong>.</p>
-        <p><strong class="text-[#754d17]">2. Покупка и Аукцион с 10 $:</strong> Остановившись на свободной улице, вокзале или коммунальном предприятии, вы можете купить их по номиналу. Если вы отказываетесь, Банкир проводит <strong>аукцион со стартовой ценой 10 $</strong> среди всех игроков.</p>
-        <p><strong class="text-[#1d5753]">3. Равномерная застройка (32 Дома и 12 Отелей):</strong> Собрав все улицы одного цвета, вы получаете двойную ренту и можете строить <strong>Дома</strong> равномерно (нельзя поставить 2-й дом, пока на каждой улице группы нет хотя бы по 1 дому). После 4 Домов строится <strong>Отель</strong>.</p>
-        <p><strong class="text-[#754d17]">4. Залог и банкротство:</strong> Заложить улицу можно за 50% цены (выкуп +10%). При нехватке денег сначала продайте здания за полцены или заложите улицы во вкладке «Активы».</p>
-        <p><strong class="text-[#8f2d28]">5. Тюрьма:</strong> Три дубля подряд отправляют в Тюрьму. Выйти можно за 50 $, по карте «Выйти из тюрьмы бесплатно» или выбросив дубль (до 3 попыток).</p>
+        <p><strong class="text-[#1d5753]">1. Старт и движение:</strong> Каждый игрок начинает на поле <strong>«СТАРТ»</strong> с капиталом <strong>1500 $</strong>. За прохождение или остановку на поле «СТАРТ» Банк выплачивает <strong>+200 $</strong>.</p>
+        <p><strong class="text-[#754d17]">2. Покупка и Аукцион (с 10 $):</strong> Остановившись на свободной улице, станции или коммунальном предприятии, вы можете купить её по номиналу. Если вы отказываетесь, Банкир проводит <strong>Аукцион начиная с 10 $</strong>, в котором участвуют все игроки.</p>
+        <p><strong class="text-[#1d5753]">3. Равномерные Дома и Отели (32 / 12):</strong> Собрав всю цветовую группу, стройте Дома равномерно. После 4 Домов на улице можно построить <strong>Отель</strong>. Продать здания обратно Банку можно за полцены.</p>
+        <p><strong class="text-[#8f2d28]">4. Тюрьма:</strong> Три дубля подряд отправляют в Тюрьму. Выйти можно за <strong>50 $</strong>, карточкой свободы или выбросив дубль (до 3 попыток).</p>
       </div>
       <button onclick="closeRulesModal()" class="hist-btn btn-turquoise w-full mt-5 py-3 rounded-lg font-historic font-bold text-sm">
         ПОНЯТНО
@@ -755,6 +837,77 @@
       </button>
     </div>
   </div>
+
+  <!-- PeerJS для прямого P2P онлайн-соединения между любыми устройствами и странами без настройки сервера -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+  <!-- Firebase SDK для мгновенной синхронизации комнат в облаке -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    window.fbCloud = {
+      ready: false,
+      mode: 'p2p', // 'firebase' или 'p2p'
+      user: null,
+      db: null,
+      auth: null,
+      appId: typeof __app_id !== 'undefined' ? __app_id : 'monopoly-world-cities',
+      doc,
+      setDoc,
+      getDoc,
+      updateDoc,
+      onSnapshot
+    };
+
+    async function initCloudConnection() {
+      const statusEl = document.getElementById('onlineAuthStatus');
+      try {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+          window.fbCloud.mode = 'p2p';
+          window.fbCloud.ready = true;
+          if (statusEl) {
+            statusEl.textContent = '✅ Онлайн-сеть (P2P) готова! Создайте комнату или введите 5-значный код друга.';
+          }
+          return;
+        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.fbCloud.auth = auth;
+        window.fbCloud.db = db;
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            window.fbCloud.user = user;
+            window.fbCloud.mode = 'firebase';
+            window.fbCloud.ready = true;
+            if (statusEl) {
+              statusEl.textContent = '✅ Облачный сервер подключён! Можно играть между Индонезией, Душанбе и любой точкой мира.';
+            }
+          }
+        });
+      } catch (err) {
+        console.warn('Fallback to P2P mode:', err);
+        window.fbCloud.mode = 'p2p';
+        window.fbCloud.ready = true;
+        if (statusEl) {
+          statusEl.textContent = '✅ Онлайн-сеть (P2P) готова! Создайте комнату или введите код друга.';
+        }
+      }
+    }
+
+    initCloudConnection();
+  </script>
 
   <script>
     /* ==========================================================================
@@ -1318,6 +1471,22 @@
     let setupCount = 4;
     let setupConfigs = [];
 
+    let onlineState = {
+      enabled: false,
+      transport: 'p2p', // 'firebase' | 'p2p'
+      roomCode: null,
+      isHost: false,
+      myUid: null,
+      myAvatarIdx: 0,
+      unsubscribe: null,
+      lastVersion: 0,
+      lastDiceAnimId: 0,
+      peer: null,
+      hostConn: null,
+      clientConns: [],
+      roomData: null
+    };
+
     let state = {
       players: [],
       properties: {},
@@ -1328,7 +1497,11 @@
       gameOver: false,
       bankHouses: 32,
       bankHotels: 12,
-      pendingDebt: null
+      pendingDebt: null,
+      lastDice: [1, 1],
+      diceRollId: 0,
+      statusText: 'Бросьте кубики, чтобы сделать ход',
+      version: 0
     };
 
     let auctionState = {
@@ -1339,6 +1512,595 @@
       activeBidders: [],
       turnIndex: 0
     };
+
+    /* ==========================================================================
+       4.1. ОНЛАЙН-МУЛЬТИПЛЕЕР (FIREBASE + ПРЯМОЙ P2P МЕЖДУ БРАУЗЕРАМИ)
+       ========================================================================== */
+    function getLocalClientUid() {
+      if (window.fbCloud?.mode === 'firebase' && window.fbCloud?.user?.uid) {
+        return window.fbCloud.user.uid;
+      }
+      if (!onlineState.myUid) {
+        onlineState.myUid = 'p2p-' + Math.random().toString(36).slice(2, 11) + '-' + Date.now().toString(36);
+      }
+      return onlineState.myUid;
+    }
+
+    function switchLobbyMode(mode) {
+      sfx.click();
+      const onlineBtn = document.getElementById('modeOnlineBtn');
+      const localBtn = document.getElementById('modeLocalBtn');
+      const onlineBlock = document.getElementById('onlineLobbyBlock');
+      const localBlock = document.getElementById('localLobbyBlock');
+
+      if (mode === 'online') {
+        onlineBtn.className = 'py-2 px-3 rounded-md font-historic font-bold text-xs sm:text-sm transition-all bg-[#2a7b76] text-[#f5ebd6] shadow';
+        localBtn.className = 'py-2 px-3 rounded-md font-historic font-bold text-xs sm:text-sm transition-all text-[#38291c]';
+        onlineBlock.classList.remove('hidden');
+        localBlock.classList.add('hidden');
+      } else {
+        localBtn.className = 'py-2 px-3 rounded-md font-historic font-bold text-xs sm:text-sm transition-all bg-[#2a7b76] text-[#f5ebd6] shadow';
+        onlineBtn.className = 'py-2 px-3 rounded-md font-historic font-bold text-xs sm:text-sm transition-all text-[#38291c]';
+        localBlock.classList.remove('hidden');
+        onlineBlock.classList.add('hidden');
+      }
+    }
+
+    function cycleOnlineAvatar() {
+      sfx.click();
+      onlineState.myAvatarIdx = (onlineState.myAvatarIdx + 1) % AVATAR_PRESETS.length;
+      const btn = document.getElementById('onlineAvatarBtn');
+      btn.innerHTML = renderAvatarVisual(onlineState.myAvatarIdx, 'text-xl');
+    }
+
+    function generateRoomCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 5; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return code;
+    }
+
+    function getRoomDocRef(code) {
+      const c = window.fbCloud;
+      return c.doc(c.db, 'artifacts', c.appId, 'public', 'data', 'monopoly_rooms', code);
+    }
+
+    function cleanupPeerConnections() {
+      if (onlineState.clientConns && onlineState.clientConns.length) {
+        onlineState.clientConns.forEach(conn => {
+          try { conn.close(); } catch (_) {}
+        });
+      }
+      onlineState.clientConns = [];
+      if (onlineState.hostConn) {
+        try { onlineState.hostConn.close(); } catch (_) {}
+        onlineState.hostConn = null;
+      }
+      if (onlineState.peer) {
+        try { onlineState.peer.destroy(); } catch (_) {}
+        onlineState.peer = null;
+      }
+    }
+
+    function broadcastP2PRoomData() {
+      if (!onlineState.isHost || !onlineState.roomData) return;
+      const payload = { type: 'ROOM_SYNC', roomData: onlineState.roomData };
+      onlineState.clientConns = onlineState.clientConns.filter(c => c && c.open);
+      onlineState.clientConns.forEach(conn => {
+        try { conn.send(payload); } catch (_) {}
+      });
+    }
+
+    function handleP2PMessageFromClient(conn, msg) {
+      if (!onlineState.isHost || !onlineState.roomData || !msg) return;
+
+      if (msg.type === 'JOIN_REQUEST' && msg.player) {
+        if (onlineState.roomData.status !== 'waiting') {
+          conn.send({ type: 'ERROR', text: '⚠️ Игра в этой комнате уже началась.' });
+          return;
+        }
+        const list = onlineState.roomData.lobbyPlayers || [];
+        if (list.length >= 7) {
+          conn.send({ type: 'ERROR', text: '⚠️ Комната заполнена (максимум 7 игроков).' });
+          return;
+        }
+        if (!list.some(p => p.uid === msg.player.uid)) {
+          const idx = list.length;
+          list.push({
+            uid: msg.player.uid,
+            name: msg.player.name,
+            avatarIdx: msg.player.avatarIdx,
+            color: PLAYER_PALETTE[idx % PLAYER_PALETTE.length].color
+          });
+          onlineState.roomData.lobbyPlayers = list;
+        }
+        onlineState.roomData.updatedAt = Date.now();
+        renderOnlineWaitingRoom(onlineState.roomData);
+        broadcastP2PRoomData();
+      } else if (msg.type === 'STATE_UPDATE' && msg.gameState) {
+        onlineState.roomData.gameState = msg.gameState;
+        onlineState.roomData.auctionState = msg.auctionState || { active: false };
+        onlineState.roomData.updatedAt = Date.now();
+        applyCloudRoomSnapshot(onlineState.roomData);
+        broadcastP2PRoomData();
+      }
+    }
+
+    async function createOnlineRoom() {
+      sfx.init();
+      sfx.click();
+      const statusEl = document.getElementById('onlineAuthStatus');
+      const rawName = document.getElementById('onlinePlayerName').value.trim();
+      const playerName = rawName || 'Игрок 1';
+      const code = generateRoomCode();
+      const myUid = getLocalClientUid();
+
+      const hostEntry = {
+        uid: myUid,
+        name: playerName,
+        avatarIdx: onlineState.myAvatarIdx,
+        color: PLAYER_PALETTE[0].color
+      };
+
+      const roomPayload = {
+        code,
+        hostUid: myUid,
+        status: 'waiting',
+        lobbyPlayers: [hostEntry],
+        gameState: null,
+        auctionState: null,
+        updatedAt: Date.now()
+      };
+
+      const c = window.fbCloud;
+      if (c && c.mode === 'firebase' && c.ready && c.user) {
+        try {
+          await c.setDoc(getRoomDocRef(code), roomPayload);
+          onlineState.enabled = true;
+          onlineState.transport = 'firebase';
+          onlineState.roomCode = code;
+          onlineState.isHost = true;
+          onlineState.roomData = roomPayload;
+          subscribeToOnlineRoom(code);
+          return;
+        } catch (err) {
+          console.warn('Firebase create fallback to P2P:', err);
+        }
+      }
+
+      // P2P режим через PeerJS (работает везде: локально, GitHub, мобильный интернет)
+      if (typeof Peer === 'undefined') {
+        statusEl.textContent = '⚠️ Не удалось загрузить сетевой модуль. Проверьте интернет.';
+        return;
+      }
+
+      cleanupPeerConnections();
+      statusEl.textContent = '⏳ Создаём онлайн-комнату...';
+      const peerId = `monopoly-world-room-${code}`;
+      const peer = new Peer(peerId, { debug: 0 });
+
+      peer.on('open', () => {
+        onlineState.enabled = true;
+        onlineState.transport = 'p2p';
+        onlineState.peer = peer;
+        onlineState.roomCode = code;
+        onlineState.isHost = true;
+        onlineState.roomData = roomPayload;
+        statusEl.textContent = `✅ Комната «${code}» создана! Отправьте код другу.`;
+        renderOnlineWaitingRoom(roomPayload);
+      });
+
+      peer.on('connection', (conn) => {
+        onlineState.clientConns.push(conn);
+        conn.on('data', (msg) => handleP2PMessageFromClient(conn, msg));
+        conn.on('close', () => {
+          onlineState.clientConns = onlineState.clientConns.filter(item => item !== conn);
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.error('Peer host error:', err);
+        statusEl.textContent = '⚠️ Ошибка сети при создании комнаты. Попробуйте ещё раз.';
+      });
+    }
+
+    async function joinOnlineRoom() {
+      sfx.init();
+      sfx.click();
+      const statusEl = document.getElementById('onlineAuthStatus');
+      const code = document.getElementById('joinRoomCodeInput').value.trim().toUpperCase();
+      if (code.length < 4) {
+        statusEl.textContent = '⚠️ Введите 5-значный код комнаты.';
+        return;
+      }
+
+      const rawName = document.getElementById('onlinePlayerName').value.trim();
+      const playerName = rawName || 'Гость';
+      const myUid = getLocalClientUid();
+
+      const c = window.fbCloud;
+      if (c && c.mode === 'firebase' && c.ready && c.user) {
+        try {
+          const ref = getRoomDocRef(code);
+          const snap = await c.getDoc(ref);
+          if (!snap.exists()) {
+            statusEl.textContent = `❌ Комната «${code}» не найдена.`;
+            return;
+          }
+
+          const data = snap.data();
+          const lobbyPlayers = Array.isArray(data.lobbyPlayers) ? [...data.lobbyPlayers] : [];
+          const alreadyIn = lobbyPlayers.some(p => p.uid === myUid);
+
+          if (!alreadyIn) {
+            if (data.status !== 'waiting') {
+              statusEl.textContent = '⚠️ Игра в этой комнате уже началась.';
+              return;
+            }
+            if (lobbyPlayers.length >= 7) {
+              statusEl.textContent = '⚠️ Комната заполнена (максимум 7 игроков).';
+              return;
+            }
+            const idx = lobbyPlayers.length;
+            lobbyPlayers.push({
+              uid: myUid,
+              name: playerName,
+              avatarIdx: onlineState.myAvatarIdx,
+              color: PLAYER_PALETTE[idx % PLAYER_PALETTE.length].color
+            });
+            await c.updateDoc(ref, { lobbyPlayers, updatedAt: Date.now() });
+          }
+
+          onlineState.enabled = true;
+          onlineState.transport = 'firebase';
+          onlineState.roomCode = code;
+          onlineState.isHost = data.hostUid === myUid;
+          subscribeToOnlineRoom(code);
+          return;
+        } catch (err) {
+          console.warn('Firebase join fallback to P2P:', err);
+        }
+      }
+
+      // P2P подключение к хосту комнаты
+      if (typeof Peer === 'undefined') {
+        statusEl.textContent = '⚠️ Не удалось загрузить сетевой модуль. Проверьте интернет.';
+        return;
+      }
+
+      cleanupPeerConnections();
+      statusEl.textContent = `⏳ Подключаемся к комнате «${code}»...`;
+      const peer = new Peer(undefined, { debug: 0 });
+      let connected = false;
+
+      const timeoutTimer = setTimeout(() => {
+        if (!connected) {
+          statusEl.textContent = `❌ Не удалось найти комнату «${code}». Проверьте код и убедитесь, что создатель открыл комнату.`;
+          cleanupPeerConnections();
+        }
+      }, 9000);
+
+      peer.on('open', () => {
+        const hostId = `monopoly-world-room-${code}`;
+        const conn = peer.connect(hostId, { reliable: true });
+        onlineState.peer = peer;
+        onlineState.hostConn = conn;
+
+        conn.on('open', () => {
+          connected = true;
+          clearTimeout(timeoutTimer);
+          onlineState.enabled = true;
+          onlineState.transport = 'p2p';
+          onlineState.roomCode = code;
+          onlineState.isHost = false;
+          statusEl.textContent = `✅ Вы вошли в комнату «${code}»!`;
+
+          conn.send({
+            type: 'JOIN_REQUEST',
+            player: {
+              uid: myUid,
+              name: playerName,
+              avatarIdx: onlineState.myAvatarIdx
+            }
+          });
+        });
+
+        conn.on('data', (msg) => {
+          if (!msg) return;
+          if (msg.type === 'ERROR') {
+            statusEl.textContent = msg.text;
+            leaveOnlineRoom();
+          } else if (msg.type === 'ROOM_SYNC' && msg.roomData) {
+            onlineState.roomData = msg.roomData;
+            if (msg.roomData.status === 'waiting') {
+              renderOnlineWaitingRoom(msg.roomData);
+            } else if (msg.roomData.status === 'playing' && msg.roomData.gameState) {
+              applyCloudRoomSnapshot(msg.roomData);
+            }
+          }
+        });
+
+        conn.on('close', () => {
+          statusEl.textContent = '⚠️ Соединение с создателем комнаты прервано.';
+        });
+      });
+
+      peer.on('error', (err) => {
+        clearTimeout(timeoutTimer);
+        console.error('Peer join error:', err);
+        statusEl.textContent = `❌ Комната «${code}» не найдена или недоступна.`;
+      });
+    }
+
+    function subscribeToOnlineRoom(code) {
+      if (onlineState.unsubscribe) {
+        onlineState.unsubscribe();
+      }
+      const c = window.fbCloud;
+      const ref = getRoomDocRef(code);
+
+      onlineState.unsubscribe = c.onSnapshot(ref, (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        onlineState.roomData = data;
+
+        if (data.status === 'waiting') {
+          renderOnlineWaitingRoom(data);
+        } else if (data.status === 'playing' && data.gameState) {
+          applyCloudRoomSnapshot(data);
+        }
+      }, (err) => {
+        console.error('Room snapshot error:', err);
+      });
+    }
+
+    function renderOnlineWaitingRoom(data) {
+      document.getElementById('onlineRoomActions').classList.add('hidden');
+      document.getElementById('onlineWaitingRoom').classList.remove('hidden');
+      document.getElementById('displayRoomCode').textContent = data.code;
+
+      const myUid = getLocalClientUid();
+      const list = document.getElementById('roomWaitingPlayersList');
+      const players = data.lobbyPlayers || [];
+      document.getElementById('roomPlayersCount').textContent = players.length;
+      list.innerHTML = '';
+
+      players.forEach((p, idx) => {
+        const isMe = p.uid === myUid;
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-2 p-2 rounded-lg bg-[#fbf6eb] border border-[#8a6424]/50 text-[#231911]';
+        item.innerHTML = `
+          <div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-[#1b1510] shrink-0" style="border: 2px solid ${p.color};">
+            ${renderAvatarVisual(p.avatarIdx, 'text-sm')}
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-bold truncate">${p.name} ${isMe ? '(Вы)' : ''}</div>
+            <div class="text-[10px] text-[#5a4634]">${idx === 0 ? '👑 Создатель комнаты' : `Участник №${idx + 1}`}</div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      const isHost = data.hostUid === myUid;
+      onlineState.isHost = isHost;
+      const startBtn = document.getElementById('startOnlineGameBtn');
+      const waitText = document.getElementById('waitingForHostText');
+
+      if (isHost) {
+        startBtn.classList.remove('hidden');
+        startBtn.disabled = players.length < 2;
+        startBtn.textContent = players.length < 2
+          ? '⏳ ЖДЁМ ХОТЯ БЫ 2-ГО ИГРОКА...'
+          : `🧭 НАЧАТЬ ОНЛАЙН-ИГРУ (${players.length} ИГР.)`;
+        waitText.classList.add('hidden');
+      } else {
+        startBtn.classList.add('hidden');
+        waitText.classList.remove('hidden');
+      }
+    }
+
+    function copyRoomCode() {
+      sfx.click();
+      const code = onlineState.roomCode;
+      if (!code) return;
+      const temp = document.createElement('textarea');
+      temp.value = code;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      document.getElementById('onlineAuthStatus').textContent = `📋 Код комнаты «${code}» скопирован! Отправьте его друзьям.`;
+    }
+
+    function leaveOnlineRoom() {
+      sfx.click();
+      if (onlineState.unsubscribe) {
+        onlineState.unsubscribe();
+        onlineState.unsubscribe = null;
+      }
+      cleanupPeerConnections();
+      onlineState.enabled = false;
+      onlineState.roomCode = null;
+      onlineState.roomData = null;
+      document.getElementById('onlineWaitingRoom').classList.add('hidden');
+      document.getElementById('onlineRoomActions').classList.remove('hidden');
+    }
+
+    async function startOnlineGame() {
+      if (!onlineState.roomCode || !onlineState.isHost) return;
+      let lobbyPlayers = [];
+
+      if (onlineState.transport === 'firebase') {
+        const c = window.fbCloud;
+        const ref = getRoomDocRef(onlineState.roomCode);
+        const snap = await c.getDoc(ref);
+        if (!snap.exists()) return;
+        lobbyPlayers = snap.data().lobbyPlayers || [];
+      } else if (onlineState.roomData) {
+        lobbyPlayers = onlineState.roomData.lobbyPlayers || [];
+      }
+
+      if (lobbyPlayers.length < 2) return;
+
+      sfx.init();
+      sfx.scrollOpen();
+
+      const newPlayers = lobbyPlayers.map((lp, i) => ({
+        id: i,
+        uid: lp.uid,
+        name: lp.name,
+        color: lp.color || PLAYER_PALETTE[i].color,
+        avatarIdx: lp.avatarIdx,
+        money: 1500,
+        position: 0,
+        inJail: false,
+        jailTurns: 0,
+        jailCards: 0,
+        bankrupt: false
+      }));
+
+      const newProps = {};
+      BOARD_TILES.forEach(t => {
+        if (['city', 'railroad', 'utility'].includes(t.type)) {
+          newProps[t.id] = { ownerId: null, houses: 0, mortgaged: false };
+        }
+      });
+
+      const initialGameState = {
+        players: newPlayers,
+        properties: newProps,
+        currentPlayerIndex: 0,
+        hasRolled: false,
+        doublesCount: 0,
+        isAnimating: false,
+        gameOver: false,
+        bankHouses: 32,
+        bankHotels: 12,
+        pendingDebt: null,
+        lastDice: [1, 1],
+        diceRollId: 0,
+        statusText: `Ходит ${newPlayers[0].name}. Бросайте кубики!`,
+        version: 1
+      };
+
+      if (onlineState.transport === 'firebase') {
+        const ref = getRoomDocRef(onlineState.roomCode);
+        await window.fbCloud.updateDoc(ref, {
+          status: 'playing',
+          gameState: initialGameState,
+          auctionState: { active: false },
+          updatedAt: Date.now()
+        });
+      } else {
+        onlineState.roomData.status = 'playing';
+        onlineState.roomData.gameState = initialGameState;
+        onlineState.roomData.auctionState = { active: false };
+        onlineState.roomData.updatedAt = Date.now();
+        applyCloudRoomSnapshot(onlineState.roomData);
+        broadcastP2PRoomData();
+      }
+    }
+
+    async function pushCloudGameState() {
+      if (!onlineState.enabled || !onlineState.roomCode) return;
+      state.version = (state.version || 0) + 1;
+      onlineState.lastVersion = state.version;
+      const gsCopy = JSON.parse(JSON.stringify(state));
+      const aucCopy = JSON.parse(JSON.stringify(auctionState));
+
+      if (onlineState.transport === 'firebase' && window.fbCloud?.ready) {
+        try {
+          const ref = getRoomDocRef(onlineState.roomCode);
+          await window.fbCloud.updateDoc(ref, {
+            gameState: gsCopy,
+            auctionState: aucCopy,
+            updatedAt: Date.now()
+          });
+        } catch (err) {
+          console.error('Sync push error:', err);
+        }
+      } else if (onlineState.transport === 'p2p') {
+        if (onlineState.isHost && onlineState.roomData) {
+          onlineState.roomData.gameState = gsCopy;
+          onlineState.roomData.auctionState = aucCopy;
+          onlineState.roomData.updatedAt = Date.now();
+          broadcastP2PRoomData();
+        } else if (onlineState.hostConn && onlineState.hostConn.open) {
+          onlineState.hostConn.send({
+            type: 'STATE_UPDATE',
+            gameState: gsCopy,
+            auctionState: aucCopy
+          });
+        }
+      }
+    }
+
+    function applyCloudRoomSnapshot(data) {
+      const incoming = data.gameState;
+      if (!incoming) return;
+
+      const setupEl = document.getElementById('setupScreen');
+      if (!setupEl.classList.contains('hidden')) {
+        setupEl.classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+        const badge = document.getElementById('onlineRoomBadge');
+        badge.classList.remove('hidden');
+        badge.textContent = `🌍 ${onlineState.roomCode}`;
+        buildBoardDOM();
+        requestAnimationFrame(resizeBoardToFit);
+        setTimeout(resizeBoardToFit, 80);
+      }
+
+      if (incoming.version && incoming.version <= onlineState.lastVersion) {
+        return;
+      }
+
+      onlineState.lastVersion = incoming.version || 0;
+      state = incoming;
+
+      if (state.lastDice && state.lastDice.length === 2) {
+        renderDice(state.lastDice[0], state.lastDice[1], false);
+      }
+      if (state.statusText) {
+        document.getElementById('statusMessage').textContent = state.statusText;
+      }
+
+      if (data.auctionState && data.auctionState.active) {
+        auctionState = data.auctionState;
+        renderAuctionModal();
+        document.getElementById('auctionModal').classList.remove('hidden');
+      } else {
+        auctionState.active = false;
+        document.getElementById('auctionModal').classList.add('hidden');
+      }
+
+      if (state.gameOver) {
+        const activePlayers = state.players.filter(pl => !pl.bankrupt);
+        if (activePlayers.length === 1) {
+          const winner = activePlayers[0];
+          document.getElementById('winnerName').textContent = winner.name;
+          document.getElementById('winnerStats').textContent = `Итоговый капитал: ${winner.money} $`;
+          document.getElementById('victoryModal').classList.remove('hidden');
+        }
+      }
+
+      updateAllUI();
+    }
+
+    function isMyOnlineTurn() {
+      if (!onlineState.enabled) return true;
+      const p = state.players[state.currentPlayerIndex];
+      const myUid = getLocalClientUid();
+      return Boolean(p && myUid && p.uid === myUid);
+    }
+
+    function getMyOnlinePlayer() {
+      if (!onlineState.enabled) return state.players[state.currentPlayerIndex];
+      const myUid = getLocalClientUid();
+      return state.players.find(p => p.uid === myUid) || state.players[state.currentPlayerIndex];
+    }
 
     /* ==========================================================================
        4. АДАПТИВНОЕ МАСШТАБИРОВАНИЕ ПОЛЯ (ТЕЛЕФОН, ПЛАНШЕТ, ROTATE)
@@ -1403,6 +2165,10 @@
         color: PLAYER_PALETTE[i].color,
         avatarIdx: i
       }));
+      const onlineBtn = document.getElementById('onlineAvatarBtn');
+      if (onlineBtn) {
+        onlineBtn.innerHTML = renderAvatarVisual(0, 'text-xl');
+      }
       renderCountSelector();
       renderPlayersSetupList();
     }
@@ -1706,16 +2472,32 @@
       const bailBtn = document.getElementById('payBailBtn');
       const jailCardBtn = document.getElementById('useJailCardBtn');
       const rescueBtn = document.getElementById('rescueBtn');
+      const myTurn = isMyOnlineTurn();
 
       if (state.pendingDebt) {
         rollBtn.classList.add('hidden');
         endBtn.classList.add('hidden');
         bailBtn.classList.add('hidden');
         jailCardBtn.classList.add('hidden');
-        rescueBtn.classList.remove('hidden');
+        const debtor = state.players[state.pendingDebt.debtorId];
+        const isMyDebt = !onlineState.enabled || (debtor && debtor.uid === getLocalClientUid());
+        if (isMyDebt) rescueBtn.classList.remove('hidden');
+        else rescueBtn.classList.add('hidden');
         return;
       } else {
         rescueBtn.classList.add('hidden');
+      }
+
+      if (!myTurn) {
+        rollBtn.classList.remove('hidden');
+        rollBtn.disabled = true;
+        rollBtn.innerHTML = `<span>⏳</span> Ходит ${p.name}...`;
+        endBtn.classList.add('hidden');
+        bailBtn.classList.add('hidden');
+        jailCardBtn.classList.add('hidden');
+        return;
+      } else {
+        rollBtn.innerHTML = `<span>🎲</span> БРОСИТЬ КУБИКИ`;
       }
 
       rollBtn.disabled = state.isAnimating || state.hasRolled || state.gameOver;
@@ -1773,6 +2555,7 @@
     }
 
     async function handleRollDice() {
+      if (!isMyOnlineTurn()) return;
       if (state.isAnimating || state.hasRolled || state.gameOver || state.pendingDebt) return;
       const p = state.players[state.currentPlayerIndex];
 
@@ -1788,6 +2571,8 @@
         await sleep(55);
       }
       renderDice(d1, d2, false);
+      state.lastDice = [d1, d2];
+      state.diceRollId = (state.diceRollId || 0) + 1;
 
       const isDouble = d1 === d2;
       const sum = d1 + d2;
@@ -1802,6 +2587,7 @@
           state.hasRolled = true;
           state.isAnimating = false;
           updateAllUI();
+          await pushCloudGameState();
         } else {
           p.jailTurns++;
           if (p.jailTurns >= 3) {
@@ -1817,6 +2603,7 @@
           state.hasRolled = true;
           state.isAnimating = false;
           updateAllUI();
+          await pushCloudGameState();
         }
         return;
       }
@@ -1829,6 +2616,7 @@
           state.hasRolled = true;
           state.isAnimating = false;
           updateAllUI();
+          await pushCloudGameState();
           return;
         }
       } else {
@@ -1846,6 +2634,7 @@
 
       state.isAnimating = false;
       updateAllUI();
+      await pushCloudGameState();
     }
 
     async function movePlayerSteps(player, steps) {
@@ -2082,6 +2871,7 @@
     }
 
     function purchaseTile(tileId) {
+      if (!isMyOnlineTurn()) return;
       const tile = BOARD_TILES[tileId];
       const player = state.players[state.currentPlayerIndex];
       const prop = state.properties[tileId];
@@ -2094,6 +2884,7 @@
 
       closeCityModal();
       updateAllUI();
+      pushCloudGameState();
     }
 
     /* ==========================================================================
@@ -2105,6 +2896,7 @@
 
       if (activePlayers.length === 0) {
         setStatus(`На аукционе за «${tile.name}» не нашлось покупателей.`);
+        pushCloudGameState();
         return;
       }
 
@@ -2120,6 +2912,7 @@
 
       renderAuctionModal();
       document.getElementById('auctionModal').classList.remove('hidden');
+      pushCloudGameState();
     }
 
     function renderAuctionModal() {
@@ -2137,13 +2930,21 @@
 
       const bidderId = auctionState.activeBidders[auctionState.turnIndex];
       const bidder = state.players[bidderId];
-      document.getElementById('auctionBidderTurn').textContent = `Ход торгов: ${bidder.name} (баланс: ${bidder.money} $)`;
+      const isMyBidTurn = !onlineState.enabled || (bidder && bidder.uid === getLocalClientUid());
+      document.getElementById('auctionBidderTurn').textContent = isMyBidTurn
+        ? `Ваш ход торгов, ${bidder.name}! (баланс: ${bidder.money} $)`
+        : `Ожидаем ставку игрока ${bidder.name}...`;
+
+      document.querySelectorAll('#auctionModal button').forEach(btn => {
+        btn.disabled = !isMyBidTurn;
+      });
     }
 
     function placeAuctionBid(increment) {
       if (!auctionState.active) return;
       const bidderId = auctionState.activeBidders[auctionState.turnIndex];
       const bidder = state.players[bidderId];
+      if (onlineState.enabled && bidder.uid !== getLocalClientUid()) return;
 
       const newBid = auctionState.leaderId === null ? 10 : auctionState.currentBid + increment;
       if (bidder.money < newBid) {
@@ -2162,10 +2963,14 @@
 
       auctionState.turnIndex = (auctionState.turnIndex + 1) % auctionState.activeBidders.length;
       renderAuctionModal();
+      pushCloudGameState();
     }
 
     function passAuctionTurn() {
       if (!auctionState.active) return;
+      const bidderId = auctionState.activeBidders[auctionState.turnIndex];
+      const bidder = state.players[bidderId];
+      if (onlineState.enabled && bidder.uid !== getLocalClientUid()) return;
       sfx.click();
 
       auctionState.activeBidders.splice(auctionState.turnIndex, 1);
@@ -2182,6 +2987,7 @@
 
       auctionState.turnIndex = auctionState.turnIndex % auctionState.activeBidders.length;
       renderAuctionModal();
+      pushCloudGameState();
     }
 
     function finishAuction() {
@@ -2198,6 +3004,7 @@
         setStatus(`Аукцион на «${tile.name}» завершён без покупателей.`);
       }
       updateAllUI();
+      pushCloudGameState();
     }
 
     /* ==========================================================================
@@ -2289,6 +3096,7 @@
     }
 
     function handlePayBail() {
+      if (!isMyOnlineTurn()) return;
       const p = state.players[state.currentPlayerIndex];
       if (!p.inJail || p.money < 50) return;
       changeMoney(p, -50);
@@ -2296,9 +3104,11 @@
       p.jailTurns = 0;
       setStatus(`${p.name} вышел из Тюрьмы! Бросайте кубики.`);
       updateAllUI();
+      pushCloudGameState();
     }
 
     function handleUseJailCard() {
+      if (!isMyOnlineTurn()) return;
       const p = state.players[state.currentPlayerIndex];
       if (!p.inJail || p.jailCards <= 0) return;
       p.jailCards--;
@@ -2307,6 +3117,7 @@
       sfx.scrollOpen();
       setStatus(`${p.name} на свободе! Бросайте кубики.`);
       updateAllUI();
+      pushCloudGameState();
     }
 
     function changeMoney(player, delta) {
@@ -2370,6 +3181,7 @@
       if (!state.pendingDebt) return;
       const debt = state.pendingDebt;
       const debtor = state.players[debt.debtorId];
+      if (onlineState.enabled && debtor.uid !== getLocalClientUid()) return;
       if (debtor.money < debt.amount) return;
 
       changeMoney(debtor, -debt.amount);
@@ -2380,18 +3192,21 @@
       state.pendingDebt = null;
       document.getElementById('rescueModal').classList.add('hidden');
       updateAllUI();
+      pushCloudGameState();
     }
 
     function declareBankruptcyFromRescue() {
       if (!state.pendingDebt) return;
       const debt = state.pendingDebt;
       const debtor = state.players[debt.debtorId];
+      if (onlineState.enabled && debtor.uid !== getLocalClientUid()) return;
       const creditor = debt.creditorId !== null ? state.players[debt.creditorId] : null;
 
       state.pendingDebt = null;
       document.getElementById('rescueModal').classList.add('hidden');
       handleBankruptcy(debtor, creditor);
       updateAllUI();
+      pushCloudGameState();
     }
 
     function spawnFloatingMoney(text, color) {
@@ -2508,7 +3323,7 @@
 
     function renderPortfolioList() {
       const list = document.getElementById('portfolioList');
-      const player = state.players[state.currentPlayerIndex];
+      const player = getMyOnlinePlayer();
       document.getElementById('bankSupplyBadge').textContent = `В Банке осталось: ${state.bankHouses} Домов • ${state.bankHotels} Отелей`;
       list.innerHTML = '';
 
@@ -2580,7 +3395,8 @@
     function buildHouse(tileId) {
       const tile = BOARD_TILES[tileId];
       const prop = state.properties[tileId];
-      const player = state.players[state.currentPlayerIndex];
+      const player = getMyOnlinePlayer();
+      if (prop.ownerId !== player.id) return;
 
       if (!canBuildEvenly(tile) || player.money < tile.buildCost) return;
 
@@ -2595,12 +3411,14 @@
       }
       renderPortfolioList();
       renderBoardState();
+      pushCloudGameState();
     }
 
     function sellHouse(tileId) {
       const tile = BOARD_TILES[tileId];
       const prop = state.properties[tileId];
-      const player = state.players[state.currentPlayerIndex];
+      const player = getMyOnlinePlayer();
+      if (prop.ownerId !== player.id) return;
       if (!canSellEvenly(tile)) return;
 
       if (prop.houses === 5) {
@@ -2614,12 +3432,14 @@
       changeMoney(player, Math.floor(tile.buildCost / 2));
       renderPortfolioList();
       renderBoardState();
+      pushCloudGameState();
     }
 
     function toggleMortgage(tileId) {
       const tile = BOARD_TILES[tileId];
       const prop = state.properties[tileId];
-      const player = state.players[state.currentPlayerIndex];
+      const player = getMyOnlinePlayer();
+      if (prop.ownerId !== player.id) return;
       if (tile.type === 'city' && groupHasAnyBuildings(tile.group)) return;
 
       const mortgageVal = Math.floor(tile.price / 2);
@@ -2635,12 +3455,14 @@
       }
       renderPortfolioList();
       renderBoardState();
+      pushCloudGameState();
     }
 
     /* ==========================================================================
        14. ПЕРЕХОД ХОДА И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
        ========================================================================== */
     function endTurn() {
+      if (!isMyOnlineTurn()) return;
       if (state.isAnimating || state.gameOver || state.pendingDebt) return;
       sfx.click();
 
@@ -2657,6 +3479,7 @@
       const nextPlayer = state.players[nextIdx];
       setStatus(`Ходит ${nextPlayer.name}. Бросайте кубики!`);
       updateAllUI();
+      pushCloudGameState();
     }
 
     function toggleSound() {
@@ -2667,6 +3490,7 @@
     }
 
     function setStatus(text) {
+      state.statusText = text;
       document.getElementById('statusMessage').textContent = text;
     }
 

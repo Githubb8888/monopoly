@@ -1070,9 +1070,9 @@
     initCloudConnection();
   </script>
 
-  <script>
+ <script>
     /* ==========================================================================
-       0. КОНФИГУРАЦИЯ ЛОКАЛЬНЫХ ФОТО И ИКОНОК ИЗ ПАПКИ Images/
+0. КОНФИГУРАЦИЯ ЛОКАЛЬНЫХ ФОТО И ИКОНОК ИЗ ПАПКИ Images/
        ========================================================================== */
     const ASSET_CONFIG = {
       folder: 'Images',
@@ -1145,7 +1145,7 @@
     }
 
     /* ==========================================================================
-       1. ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API)
+1. ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API)
        ========================================================================== */
     class HistoricSoundEngine {
       constructor() {
@@ -1224,7 +1224,7 @@
     const sfx = new HistoricSoundEngine();
 
     /* ==========================================================================
-       2. ДАННЫЕ ПОЛЯ: 40 КЛЕТОК (ГОРОДА МИРА + ИНТЕРЕСНЫЕ ФАКТЫ)
+2. ДАННЫЕ ПОЛЯ: 40 КЛЕТОК (ГОРОДА МИРА + ИНТЕРЕСНЫЕ ФАКТЫ)
        ========================================================================== */
     const GROUP_COLORS = {
       brown: '#7a4b2a',
@@ -1607,7 +1607,7 @@
     ];
 
     /* ==========================================================================
-       3. СОСТОЯНИЕ ИГРЫ (В ТОМ ЧИСЛЕ БАНК: 32 ДОМА И 12 ОТЕЛЕЙ)
+3. СОСТОЯНИЕ ИГРЫ (В ТОМ ЧИСЛЕ БАНК: 32 ДОМА И 12 ОТЕЛЕЙ)
        ========================================================================== */
     const PLAYER_PALETTE = [
       { name: 'Игрок 1', color: '#2a7b76' },
@@ -1634,7 +1634,7 @@
 
     let onlineState = {
       enabled: false,
-      transport: 'p2p', // 'firebase' | 'p2p'
+      transport: 'p2p',
       roomCode: null,
       isHost: false,
       myUid: null,
@@ -1662,6 +1662,7 @@
       lastDice: [1, 1],
       diceRollId: 0,
       statusText: 'Бросьте кубики, чтобы сделать ход',
+      sharedModal: null,
       version: 0
     };
 
@@ -1831,7 +1832,6 @@
         }
       }
 
-      // P2P режим через PeerJS (работает везде: локально, GitHub, мобильный интернет)
       if (typeof Peer === 'undefined') {
         statusEl.textContent = '⚠️ Не удалось загрузить сетевой модуль. Проверьте интернет.';
         return;
@@ -1925,7 +1925,6 @@
         }
       }
 
-      // P2P подключение к хосту комнаты
       if (typeof Peer === 'undefined') {
         statusEl.textContent = '⚠️ Не удалось загрузить сетевой модуль. Проверьте интернет.';
         return;
@@ -2143,6 +2142,7 @@
         lastDice: [1, 1],
         diceRollId: 0,
         statusText: `Ходит ${newPlayers[0].name}. Бросайте кубики!`,
+        sharedModal: null,
         version: 1
       };
 
@@ -2218,12 +2218,24 @@
         return;
       }
 
+      const prevPositions = state.players.map(p => p.position);
+      const prevDiceId = state.diceRollId || 0;
+
       onlineState.lastVersion = incoming.version || 0;
       state = incoming;
 
       if (state.lastDice && state.lastDice.length === 2) {
         renderDice(state.lastDice[0], state.lastDice[1], false);
+        if ((state.diceRollId || 0) > prevDiceId) {
+          sfx.diceRoll();
+        }
       }
+
+      const moved = state.players.some((p, idx) => prevPositions[idx] !== undefined && prevPositions[idx] !== p.position);
+      if (moved) {
+        sfx.step();
+      }
+
       if (state.statusText) {
         document.getElementById('statusMessage').textContent = state.statusText;
       }
@@ -2235,6 +2247,27 @@
       } else {
         auctionState.active = false;
         document.getElementById('auctionModal').classList.add('hidden');
+      }
+
+      // Показываем карточки (Шанс, Мировой фонд, Карточку города) всем игрокам в комнате
+      if (state.sharedModal) {
+        if (state.sharedModal.kind === 'event') {
+          const ev = state.sharedModal;
+          document.getElementById('eventCardIcon').textContent = ev.card.icon;
+          document.getElementById('eventCardDeck').textContent = `${ev.deckTitle} (${ev.playerName})`;
+          document.getElementById('eventCardTitle').textContent = ev.card.title;
+          document.getElementById('eventCardDesc').textContent = ev.card.desc;
+          document.getElementById('eventCardModal').classList.remove('hidden');
+        } else if (state.sharedModal.kind === 'city') {
+          openCityModal(state.sharedModal.tileId, state.sharedModal.actionContext, true);
+        }
+      } else {
+        if (!pendingCardCallback) {
+          document.getElementById('eventCardModal').classList.add('hidden');
+        }
+        if (!isMyOnlineTurn()) {
+          document.getElementById('cityModal').classList.add('hidden');
+        }
       }
 
       if (state.gameOver) {
@@ -2264,7 +2297,7 @@
     }
 
     /* ==========================================================================
-       4. АДАПТИВНОЕ МАСШТАБИРОВАНИЕ ПОЛЯ (ТЕЛЕФОН, ПЛАНШЕТ, ROTATE)
+4. АДАПТИВНОЕ МАСШТАБИРОВАНИЕ ПОЛЯ (ТЕЛЕФОН, ПЛАНШЕТ, ROTATE)
        ========================================================================== */
     function resizeBoardToFit() {
       const container = document.getElementById('boardContainer');
@@ -2305,7 +2338,7 @@
     }
 
     /* ==========================================================================
-       5. НАСТРОЙКА ЛОББИ (2–7 ИГРОКОВ)
+5. НАСТРОЙКА ЛОББИ (2–7 ИГРОКОВ)
        ========================================================================== */
     function renderAvatarVisual(avatarIdx, sizeClass = 'text-xl') {
       const customFile = ASSET_CONFIG.playerIcons[avatarIdx];
@@ -2400,7 +2433,7 @@
     }
 
     /* ==========================================================================
-       6. СТАРТ ИГРЫ И ОТРИСОВКА ПОЛЯ 11x11
+6. СТАРТ ИГРЫ И ОТРИСОВКА ПОЛЯ 11x11
        ========================================================================== */
     function startGame() {
       sfx.init();
@@ -2416,6 +2449,7 @@
       state.bankHouses = 32;
       state.bankHotels = 12;
       state.pendingDebt = null;
+      state.sharedModal = null;
 
       for (let i = 0; i < setupCount; i++) {
         const cfg = setupConfigs[i];
@@ -2513,7 +2547,7 @@
     }
 
     /* ==========================================================================
-       7. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+7. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
        ========================================================================== */
     function updateAllUI() {
       renderPlayersHUD();
@@ -2690,7 +2724,7 @@
     }
 
     /* ==========================================================================
-       8. КУБИКИ И ПЕРЕМЕЩЕНИЕ
+8. КУБИКИ И ПЕРЕМЕЩЕНИЕ
        ========================================================================== */
     const DICE_PATTERNS = {
       1: [4],
@@ -2743,6 +2777,7 @@
       const isDouble = d1 === d2;
       const sum = d1 + d2;
       setStatus(`${p.name}: выпало ${d1} и ${d2} (сумма ${sum})${isDouble ? ' — ДУБЛЬ!' : ''}`);
+      await pushCloudGameState();
 
       if (p.inJail) {
         if (isDouble) {
@@ -2815,7 +2850,8 @@
         }
         renderBoardState();
         renderPlayersHUD();
-        await sleep(515);
+        await pushCloudGameState();
+        await sleep(300);
       }
 
       await resolveTileLanding(player, Math.abs(steps));
@@ -2925,9 +2961,14 @@
     }
 
     /* ==========================================================================
-       9. КАРТОЧКА ГОРОДА (ИНТЕРЕСНЫЕ ФАКТЫ + ПОКУПКА ИЛИ АУКЦИОН)
+9. КАРТОЧКА ГОРОДА (ИНТЕРЕСНЫЕ ФАКТЫ + ПОКУПКА ИЛИ АУКЦИОН)
        ========================================================================== */
-    function openCityModal(tileId, actionContext) {
+    function openCityModal(tileId, actionContext, isRemoteSync = false) {
+      if (actionContext && !isRemoteSync && isMyOnlineTurn()) {
+        state.sharedModal = { kind: 'city', tileId, actionContext };
+        pushCloudGameState();
+      }
+
       const tile = BOARD_TILES[tileId];
       const modal = document.getElementById('cityModal');
 
@@ -2998,12 +3039,17 @@
             ? 'bg-[#8f2d28]/15 border-[#8f2d28] text-[#6e1c18]'
             : 'bg-[#2a7b76]/15 border-[#2a7b76] text-[#16423f]'
         }`;
+      } else if (actionContext && actionContext.type === 'buy' && !isMyOnlineTurn()) {
+        const activePlayer = state.players[state.currentPlayerIndex];
+        noticeEl.classList.remove('hidden');
+        noticeEl.textContent = `⏳ Игрок ${activePlayer.name} решает, покупать ли этот участок...`;
+        noticeEl.className = 'rounded-lg p-3 text-xs sm:text-sm font-semibold text-center border bg-[#2a7b76]/15 border-[#2a7b76] text-[#16423f]';
       } else {
         noticeEl.classList.add('hidden');
       }
 
       const activePlayer = state.players[state.currentPlayerIndex];
-      if (actionContext && actionContext.type === 'buy' && isBuyable && state.properties[tile.id].ownerId === null) {
+      if (actionContext && actionContext.type === 'buy' && isBuyable && state.properties[tile.id].ownerId === null && isMyOnlineTurn()) {
         const canAfford = activePlayer.money >= tile.price;
         const buyBtn = document.createElement('button');
         buyBtn.className = 'hist-btn btn-turquoise flex-1 py-3 px-4 rounded-lg font-historic font-bold text-sm';
@@ -3034,6 +3080,10 @@
     function closeCityModal() {
       sfx.click();
       document.getElementById('cityModal').classList.add('hidden');
+      if (state.sharedModal && state.sharedModal.kind === 'city' && isMyOnlineTurn()) {
+        state.sharedModal = null;
+        pushCloudGameState();
+      }
     }
 
     function purchaseTile(tileId) {
@@ -3046,19 +3096,21 @@
 
       changeMoney(player, -tile.price);
       prop.ownerId = player.id;
+      state.sharedModal = null;
       setStatus(`${player.name} приобрёл «${tile.name}»!`);
 
-      closeCityModal();
+      document.getElementById('cityModal').classList.add('hidden');
       updateAllUI();
       pushCloudGameState();
     }
 
     /* ==========================================================================
-       10. АУКЦИОН БАНКИРА (ОФИЦИАЛЬНОЕ ПРАВИЛО: СТАРТ С 10 $, ШАГ ОТ +1 $)
+10. АУКЦИОН БАНКИРА (ОФИЦИАЛЬНОЕ ПРАВИЛО: СТАРТ С 10 $, ШАГ ОТ +1 $)
        ========================================================================== */
     function startAuction(tileId) {
       const activePlayers = state.players.filter(p => !p.bankrupt && p.money >= 10);
       const tile = BOARD_TILES[tileId];
+      state.sharedModal = null;
 
       if (activePlayers.length === 0) {
         setStatus(`На аукционе за «${tile.name}» не нашлось покупателей.`);
@@ -3174,7 +3226,7 @@
     }
 
     /* ==========================================================================
-       11. КАРТОЧКИ «ШАНС» И «МИРОВОЙ ФОНД»
+11. КАРТОЧКИ «ШАНС» И «МИРОВОЙ ФОНД»
        ========================================================================== */
     let pendingCardCallback = null;
 
@@ -3187,8 +3239,19 @@
         document.getElementById('eventCardDesc').textContent = card.desc;
         document.getElementById('eventCardModal').classList.remove('hidden');
 
+        if (isMyOnlineTurn()) {
+          state.sharedModal = {
+            kind: 'event',
+            deckTitle,
+            card,
+            playerName: player.name
+          };
+          pushCloudGameState();
+        }
+
         pendingCardCallback = async () => {
           document.getElementById('eventCardModal').classList.add('hidden');
+          state.sharedModal = null;
 
           if (card.action === 'money') {
             if (card.value >= 0) changeMoney(player, card.value);
@@ -3233,6 +3296,7 @@
           }
 
           updateAllUI();
+          await pushCloudGameState();
           resolve();
         };
       });
@@ -3240,6 +3304,10 @@
 
     function closeEventCardModal() {
       sfx.click();
+      if (state.sharedModal && state.sharedModal.kind === 'event' && isMyOnlineTurn()) {
+        state.sharedModal = null;
+        pushCloudGameState();
+      }
       if (pendingCardCallback) {
         const fn = pendingCardCallback;
         pendingCardCallback = null;
@@ -3250,7 +3318,7 @@
     }
 
     /* ==========================================================================
-       12. ТЮРЬМА, ДЕНЬГИ, ДОЛГИ И БАНКРОТСТВО (ОФИЦИАЛЬНЫЕ ПРАВИЛА)
+12. ТЮРЬМА, ДЕНЬГИ, ДОЛГИ И БАНКРОТСТВО (ОФИЦИАЛЬНЫЕ ПРАВИЛА)
        ========================================================================== */
     function sendPlayerToJail(player) {
       sfx.jail();
@@ -3444,7 +3512,7 @@
     }
 
     /* ==========================================================================
-       13. УПРАВЛЕНИЕ АКТИВАМИ: РАВНОМЕРНЫЕ ДОМА/ОТЕЛИ (32/12) И ЗАЛОГ
+13. УПРАВЛЕНИЕ АКТИВАМИ: РАВНОМЕРНЫЕ ДОМА/ОТЕЛИ (32/12) И ЗАЛОГ
        ========================================================================== */
     function openPortfolioModal() {
       sfx.click();
@@ -3538,7 +3606,7 @@
               </button>
               <button onclick="sellHouse(${tile.id})" ${!canSellHouse ? 'disabled' : ''}
                 class="hist-btn btn-bronze-outline px-2.5 py-1.5 rounded text-xs font-semibold">
-                - Продать (+${Math.floor(tile.buildCost / 2)} $)
+- Продать (+${Math.floor(tile.buildCost / 2)} $)
               </button>
             ` : ''}
             ${!prop.mortgaged ? `
@@ -3625,7 +3693,7 @@
     }
 
     /* ==========================================================================
-       14. ПЕРЕХОД ХОДА И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+14. ПЕРЕХОД ХОДА И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
        ========================================================================== */
     function endTurn() {
       if (!isMyOnlineTurn()) return;
@@ -3634,6 +3702,7 @@
 
       state.hasRolled = false;
       state.doublesCount = 0;
+      state.sharedModal = null;
 
       let nextIdx = state.currentPlayerIndex;
       for (let i = 0; i < state.players.length; i++) {

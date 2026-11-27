@@ -131,36 +131,55 @@
       border: 1px solid #e07a74;
     }
 
-    /* Адаптивная раскладка игрового экрана (портрет и альбом / rotate) */
+    /* Адаптивная split-раскладка игрового экрана:
+       - Портрет (телефон вертикально): Поле сверху во всю ширину, управление + игроки снизу
+       - Альбом / Планшет / ПК (rotate): Поле слева во всю высоту, панель управления + игроки справа */
     #gameScreen {
       display: flex;
       flex-direction: column;
       width: 100%;
       height: 100dvh;
-      padding: 6px;
-      gap: 6px;
+      padding: 4px;
+      gap: 4px;
+      overflow: hidden;
     }
 
-    @media (min-width: 1024px), (orientation: landscape) and (min-width: 560px) {
+    #boardContainer {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #sideControlPanel {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    @media (min-width: 900px), (orientation: landscape) and (min-width: 480px) {
       #gameScreen {
         flex-direction: row;
         align-items: stretch;
-        padding: 8px;
-        gap: 8px;
+        padding: 6px;
+        gap: 6px;
       }
-      #leftHudPanel {
-        width: clamp(190px, 23vw, 290px);
-        flex-direction: column !important;
+      #boardContainer {
+        flex: 1 1 auto;
+        width: auto;
+        height: 100%;
       }
-      #playersHudList {
-        flex-direction: column !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        max-height: none !important;
-      }
-      #rightLogPanel {
-        width: clamp(175px, 21vw, 280px);
-        max-height: none !important;
+      #sideControlPanel {
+        flex: 0 0 clamp(220px, 36vw, 360px);
+        height: 100%;
       }
     }
 
@@ -170,42 +189,42 @@
       height: 320px;
       aspect-ratio: 1 / 1;
       display: grid;
-      grid-template-columns: 1.48fr repeat(9, 1fr) 1.48fr;
-      grid-template-rows: 1.48fr repeat(9, 1fr) 1.48fr;
+      grid-template-columns: 1.55fr repeat(9, 1fr) 1.55fr;
+      grid-template-rows: 1.55fr repeat(9, 1fr) 1.55fr;
       gap: 2px;
       padding: 5px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #6e4e1b, #b88c3a, #5c4014);
-      border: 2px solid var(--gold-light);
-      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.88), inset 0 0 12px rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      background: #231911;
+      border: 3px solid var(--gold);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.88);
       position: relative;
       flex-shrink: 0;
     }
 
     .tile {
       position: relative;
-      background: linear-gradient(180deg, #f5ebd6 0%, #e6d4b1 100%);
-      border-radius: 3px;
+      background: #fbf6eb;
+      border-radius: 2px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.16s ease, box-shadow 0.16s ease;
-      border: 1px solid rgba(110, 78, 27, 0.55);
-      color: var(--ink);
+      border: 1.5px solid #2b2118;
+      color: #140e09;
     }
 
     .tile:hover {
       z-index: 25;
-      transform: scale(1.07);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+      transform: scale(1.08);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75);
       border-color: var(--turquoise);
     }
 
     .tile-active-glow {
-      box-shadow: inset 0 0 0 2px var(--turquoise), 0 0 12px rgba(42, 123, 118, 0.75) !important;
-      background: linear-gradient(180deg, #fff8ea 0%, #ebd9b5 100%) !important;
+      box-shadow: inset 0 0 0 2.5px #1d5753, 0 0 14px rgba(42, 123, 118, 0.85) !important;
+      background: #fffdf8 !important;
     }
 
     .tile-mortgaged {
@@ -216,23 +235,26 @@
     /* Цветная полоса региона города */
     .color-bar {
       width: 100%;
-      height: 21%;
-      min-height: 6px;
+      height: 24%;
+      min-height: 7px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 2px;
       padding: 0 2px;
-      border-bottom: 1px solid rgba(35, 25, 17, 0.35);
+      border-bottom: 1.5px solid #2b2118;
+      flex-shrink: 0;
     }
 
     .tile-name {
-      font-size: clamp(5.5px, 0.85vmin, 11px);
-      font-weight: 700;
-      line-height: 1.04;
+      font-family: 'Lora', Georgia, serif;
+      font-size: clamp(6.5px, 1.05vmin, 13px);
+      font-weight: 800;
+      line-height: 1.06;
       text-align: center;
       padding: 1px 2px;
-      color: #1f160e;
+      color: #120c07;
+      letter-spacing: -0.01em;
       word-break: break-word;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -241,19 +263,22 @@
     }
 
     .tile-price {
-      font-size: clamp(5.5px, 0.78vmin, 10px);
-      font-weight: 700;
+      font-size: clamp(6.5px, 0.98vmin, 12px);
+      font-weight: 800;
       text-align: center;
-      color: var(--ink-muted);
-      padding-bottom: 1px;
+      color: #1f160e;
+      background: rgba(212, 188, 141, 0.45);
+      border-top: 1px solid rgba(43, 33, 24, 0.18);
+      padding: 1px 0;
+      flex-shrink: 0;
     }
 
     .corner-tile {
-      background: radial-gradient(circle at center, #f6ecd7, #d8c196);
+      background: #f3e6cc;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       text-align: center;
-      padding: 2px;
+      padding: 3px 2px;
     }
 
     /* Печать владельца на клетке */
@@ -327,33 +352,31 @@
       box-shadow: 0 0 0 2px #fff8ea, 0 4px 10px rgba(0, 0, 0, 0.85);
     }
 
-    /* Центральная область поля */
+    /* Центральная область поля — светлая классическая столешница Монополии */
     .board-center {
       grid-column: 2 / 11;
       grid-row: 2 / 11;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(242, 230, 207, 0.14), rgba(18, 14, 11, 0.94)),
-        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 28px, rgba(197, 155, 67, 0.06) 29px, transparent 30px);
-      background-color: #191410;
-      border-radius: 6px;
-      border: 1.5px solid rgba(197, 155, 67, 0.45);
+      background: linear-gradient(145deg, #cde0d3 0%, #dbe8dc 50%, #c4d9cb 100%);
+      border-radius: 4px;
+      border: 2px solid #2b2118;
+      box-shadow: inset 0 0 28px rgba(42, 95, 72, 0.18);
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: clamp(5px, 1.4vmin, 16px);
+      padding: clamp(6px, 1.8vmin, 22px);
       overflow: hidden;
     }
 
-    /* Декоративная роза ветров в центре */
-    .compass-watermark {
-      position: absolute;
-      width: 58%;
-      height: 58%;
-      opacity: 0.08;
-      pointer-events: none;
-      color: var(--gold-light);
+    /* Декоративные контуры колод карт в центре как в классической Монополии */
+    .center-deck-box {
+      border: 2px dashed rgba(35, 25, 17, 0.45);
+      background: rgba(251, 246, 235, 0.55);
+      border-radius: 6px;
+      padding: clamp(4px, 0.9vmin, 10px) clamp(8px, 1.4vmin, 16px);
+      text-align: center;
+      color: #231911;
     }
 
     /* Кубики */
@@ -464,15 +487,60 @@
   <!-- ==================== ОСНОВНОЙ ИГРОВОЙ ЭКРАН ==================== -->
   <div id="gameScreen" class="hidden relative z-10">
 
-    <!-- ЛЕВАЯ / ВЕРХНЯЯ ПАНЕЛЬ: ИГРОКИ -->
-    <aside id="leftHudPanel" class="w-full flex flex-col gap-1.5 shrink-0">
-      <div class="obsidian-panel rounded-lg px-2.5 py-1.5 flex items-center justify-between shrink-0 gap-1">
+    <!-- СТОРОНА 1: ИГРОВОЕ ПОЛЕ (КАРТА) -->
+    <main id="boardContainer">
+      <div id="boardGrid" class="board-wrapper">
+        <!-- 40 клеток генерируются JS -->
+
+        <!-- ЦЕНТР ПОЛЯ: СВЕТЛАЯ КЛАССИЧЕСКАЯ СЕРЕДИНА С КОЛОДАМИ КАРТ И КУБИКАМИ -->
+        <div class="board-center">
+          <!-- Верхняя колода: Мировой фонд и Шанс -->
+          <div class="w-full flex items-center justify-between gap-2 z-10">
+            <div class="center-deck-box -rotate-3">
+              <div class="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#8a6424]">🏦 МИРОВОЙ ФОНД</div>
+            </div>
+            <div class="center-deck-box rotate-3">
+              <div class="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider text-[#1d5753]">❓ ШАНС</div>
+            </div>
+          </div>
+
+          <!-- Логотип, кубики и статус хода по центру -->
+          <div class="flex flex-col items-center justify-center gap-2 sm:gap-3 my-auto z-10 w-full">
+            <div class="px-3 sm:px-5 py-1 sm:py-1.5 rounded bg-[#9e2b25] border-2 border-[#fbf6eb] shadow-md -rotate-2">
+              <div class="font-historic text-xs sm:text-xl font-extrabold text-[#fbf6eb] tracking-widest uppercase">
+                МОНОПОЛИЯ
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-5">
+              <div id="dice1" class="dice-box"></div>
+              <div id="dice2" class="dice-box"></div>
+            </div>
+
+            <div id="statusMessage" class="text-[11px] sm:text-sm font-bold text-center text-[#1a120b] bg-[#fbf6eb]/95 px-3 py-1.5 rounded-lg border-2 border-[#8a6424] shadow-sm max-w-[92%] line-clamp-2">
+              Бросьте кубики, чтобы сделать ход
+            </div>
+          </div>
+
+          <!-- Подсказка внизу центра -->
+          <div class="text-[9px] sm:text-xs font-bold text-[#234535] tracking-wide z-10">
+            Нажмите на любую клетку города, чтобы открыть факты
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- СТОРОНА 2: ПАНЕЛЬ УПРАВЛЕНИЯ И ИГРОКИ -->
+    <aside id="sideControlPanel">
+      <!-- Верхняя шапка + быстрые настройки -->
+      <div class="obsidian-panel rounded-lg px-2.5 py-2 flex items-center justify-between shrink-0 gap-1.5">
         <div class="flex items-center gap-1.5 min-w-0">
-          <span class="text-[#c59b43] text-sm">🧭</span>
-          <span class="font-historic text-xs sm:text-sm font-bold text-[#e2be6b] tracking-wider truncate">АТЛАС МИРА</span>
+          <span id="turnAvatar" class="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-[#120e0b] shrink-0">👑</span>
+          <span id="turnName" class="font-historic text-xs sm:text-sm font-bold text-[#f2e6cf] truncate">Игрок 1</span>
+          <span id="turnMoney" class="text-xs font-bold text-[#e2be6b] shrink-0">1500 $</span>
         </div>
         <div class="flex items-center gap-1 shrink-0">
-          <button id="fullscreenBtn" onclick="toggleFullscreen()" title="На весь экран (Rotate)" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
+          <button id="fullscreenBtn" onclick="toggleFullscreen()" title="На весь экран" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
             ⛶
           </button>
           <button id="soundToggleBtn" onclick="toggleSound()" title="Звук" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
@@ -487,83 +555,30 @@
         </div>
       </div>
 
-      <div id="playersHudList" class="flex gap-1.5 overflow-x-auto pb-0.5 flex-1"></div>
-    </aside>
-
-    <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ: ИГРОВОЕ ПОЛЕ -->
-    <main id="boardContainer" class="flex-1 flex items-center justify-center min-w-0 min-h-0 overflow-hidden">
-      <div id="boardGrid" class="board-wrapper">
-        <!-- 40 клеток генерируются JS -->
-
-        <!-- ЦЕНТР ПОЛЯ -->
-        <div class="board-center">
-          <!-- Водяной знак компаса -->
-          <svg class="compass-watermark" viewBox="0 0 100 100" fill="none" stroke="currentColor">
-            <circle cx="50" cy="50" r="46" stroke-width="1"/>
-            <circle cx="50" cy="50" r="38" stroke-width="0.6" stroke-dasharray="3 3"/>
-            <polygon points="50,4 56,44 96,50 56,56 50,96 44,56 4,50 44,44" stroke-width="1"/>
-          </svg>
-
-          <!-- Баннер текущего хода -->
-          <div class="w-full flex flex-col items-center text-center z-10">
-            <div class="text-[8px] sm:text-[10px] uppercase tracking-widest text-[#c59b43] font-semibold">СЕЙЧАС ХОДИТ</div>
-            <div id="turnBanner" class="mt-0.5 px-3 py-0.5 sm:py-1 rounded-full bg-[#241c15] border border-[#c59b43] flex items-center gap-1.5 sm:gap-2 shadow">
-              <span id="turnAvatar" class="text-sm flex items-center justify-center">👑</span>
-              <span id="turnName" class="font-historic text-xs sm:text-base font-bold text-[#f2e6cf] truncate max-w-[115px] sm:max-w-[180px]">Игрок 1</span>
-              <span id="turnMoney" class="text-[10px] sm:text-xs font-bold text-[#e2be6b]">1500 $</span>
-            </div>
-          </div>
-
-          <!-- Кубики и статус -->
-          <div class="flex flex-col items-center justify-center gap-1 sm:gap-2.5 my-auto z-10">
-            <div class="flex items-center gap-2.5 sm:gap-4">
-              <div id="dice1" class="dice-box"></div>
-              <div id="dice2" class="dice-box"></div>
-            </div>
-            <div id="statusMessage" class="text-[9px] sm:text-xs text-center text-[#f2e6cf] bg-[#120e0b]/85 px-2.5 py-1 rounded border border-[#8a6424]/50 max-w-[94%] line-clamp-2">
-              Бросьте кубики, чтобы сделать ход
-            </div>
-          </div>
-
-          <!-- Кнопки действия -->
-          <div class="w-full flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 z-10">
-            <button id="rollBtn" onclick="handleRollDice()" class="hist-btn btn-gold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-historic font-bold text-[10px] sm:text-xs flex items-center gap-1">
-              <span>🎲</span> БРОСИТЬ КУБИКИ
-            </button>
-            <button id="payBailBtn" onclick="handlePayBail()" class="hidden hist-btn btn-bronze-outline px-2.5 py-1.5 rounded-lg text-[#e2be6b] font-bold text-[9px] sm:text-xs">
-              🔓 Выкуп 50 $
-            </button>
-            <button id="useJailCardBtn" onclick="handleUseJailCard()" class="hidden hist-btn btn-turquoise px-2.5 py-1.5 rounded-lg font-bold text-[9px] sm:text-xs">
-              📜 Карта свободы
-            </button>
-            <button id="managePropsBtn" onclick="openPortfolioModal()" class="hist-btn btn-bronze-outline px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[9px] sm:text-xs flex items-center gap-1">
-              <span>🏛️</span> Активы
-            </button>
-            <button id="tradeBtn" onclick="openTradeModal()" class="hist-btn btn-bronze-outline px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[9px] sm:text-xs flex items-center gap-1">
-              <span>🤝</span> Сделка
-            </button>
-            <button id="rescueBtn" onclick="openRescueModal()" class="hidden hist-btn btn-crimson px-3 py-1.5 sm:py-2 rounded-lg font-bold text-[10px] sm:text-xs animate-pulse">
-              ⚠️ Погасить долг!
-            </button>
-            <button id="endTurnBtn" onclick="endTurn()" class="hidden hist-btn btn-turquoise px-3.5 py-1.5 sm:py-2 rounded-lg font-historic font-bold text-[10px] sm:text-xs">
-              ЗАВЕРШИТЬ ХОД ➔
-            </button>
-          </div>
-        </div>
+      <!-- Крупные удобные кнопки хода для пальцев -->
+      <div id="turnBanner" class="obsidian-panel rounded-lg p-2 flex flex-wrap items-center justify-center gap-1.5 shrink-0">
+        <button id="rollBtn" onclick="handleRollDice()" class="hist-btn btn-gold flex-1 min-w-[130px] py-2.5 px-3 rounded-lg font-historic font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5">
+          <span>🎲</span> БРОСИТЬ КУБИКИ
+        </button>
+        <button id="endTurnBtn" onclick="endTurn()" class="hidden hist-btn btn-turquoise flex-1 min-w-[130px] py-2.5 px-3 rounded-lg font-historic font-bold text-xs sm:text-sm">
+          ЗАВЕРШИТЬ ХОД ➔
+        </button>
+        <button id="payBailBtn" onclick="handlePayBail()" class="hidden hist-btn btn-bronze-outline py-2.5 px-2.5 rounded-lg text-[#e2be6b] font-bold text-xs">
+          🔓 Выкуп 50 $
+        </button>
+        <button id="useJailCardBtn" onclick="handleUseJailCard()" class="hidden hist-btn btn-turquoise py-2.5 px-2.5 rounded-lg font-bold text-xs">
+          📜 Карта свободы
+        </button>
+        <button id="managePropsBtn" onclick="openPortfolioModal()" class="hist-btn btn-bronze-outline py-2.5 px-3 rounded-lg font-semibold text-xs flex items-center gap-1">
+          <span>🏛️</span> Активы
+        </button>
+        <button id="rescueBtn" onclick="openRescueModal()" class="hidden hist-btn btn-crimson flex-1 py-2.5 px-3 rounded-lg font-bold text-xs animate-pulse">
+          ⚠️ Погасить долг!
+        </button>
       </div>
-    </main>
 
-    <!-- ПРАВАЯ / НИЖНЯЯ ПАНЕЛЬ: ЖУРНАЛ ХОДОВ -->
-    <aside id="rightLogPanel" class="w-full obsidian-panel rounded-lg p-2 flex flex-col shrink-0 max-h-20">
-      <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-1 mb-1">
-        <span class="font-historic text-[10px] sm:text-xs font-bold text-[#e2be6b] flex items-center gap-1">
-          <span>✒️</span> ХРОНИКА ИГРЫ
-        </span>
-        <span class="text-[9px] text-[#a8947a]">Нажмите на любой город</span>
-      </div>
-      <div id="gameLog" class="flex-1 overflow-y-auto space-y-1 text-[10px] sm:text-xs text-[#dfd0b8] pr-1">
-        <div class="text-[#e2be6b]">Нажмите на любую клетку поля, чтобы открыть карточку города с интересными фактами.</div>
-      </div>
+      <!-- Список игроков -->
+      <div id="playersHudList" class="flex flex-row lg:flex-col landscape:flex-col gap-1.5 overflow-x-auto landscape:overflow-y-auto landscape:overflow-x-hidden flex-1 min-h-0"></div>
     </aside>
   </div>
 
@@ -660,63 +675,6 @@
     </div>
   </div>
 
-  <!-- ==================== МОДАЛЬНОЕ ОКНО: СДЕЛКИ И ОБМЕН МЕЖДУ ИГРОКАМИ ==================== -->
-  <div id="tradeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs">
-    <div class="parchment-card corner-ornament w-full max-w-2xl rounded-xl p-4 sm:p-6 flex flex-col max-h-[90dvh]">
-      <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-3 mb-3">
-        <div>
-          <h3 class="font-historic text-lg sm:text-2xl font-bold text-[#231911]">🤝 СДЕЛКИ И ОБМЕН СОБСТВЕННОСТЬЮ</h3>
-          <p class="text-xs text-[#5a4634]">Обменивайтесь улицами (без зданий), деньгами и картами «Выйти из тюрьмы бесплатно»</p>
-        </div>
-        <button onclick="closeTradeModal()" class="w-8 h-8 rounded-full bg-[#231911] text-[#f2e6cf] border border-[#8a6424]">✕</button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="flex items-center gap-2">
-          <label class="text-xs font-bold text-[#231911]">Партнёр по сделке:</label>
-          <select id="tradePartnerSelect" onchange="renderTradeLists()" class="bg-[#e6d1a7] border border-[#8a6424] rounded px-3 py-1.5 text-xs font-bold text-[#231911]"></select>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Предложение инициатора -->
-          <div class="p-3 rounded-lg bg-[#e6d1a7]/80 border border-[#8a6424]/50 space-y-2">
-            <div id="tradeMyTitle" class="font-historic font-bold text-sm text-[#1d5753]">Ваше предложение</div>
-            <div class="flex items-center gap-2 text-xs">
-              <span>Деньги ($):</span>
-              <input id="tradeMyCash" type="number" min="0" value="0" class="w-24 bg-[#f7efe0] border border-[#8a6424] rounded px-2 py-1 font-bold text-[#231911]">
-            </div>
-            <label id="tradeMyJailLabel" class="hidden flex items-center gap-1.5 text-xs font-semibold text-[#231911]">
-              <input id="tradeMyJailCheck" type="checkbox"> Передать карту «Выйти из тюрьмы»
-            </label>
-            <div id="tradeMyPropsList" class="space-y-1 max-h-40 overflow-y-auto text-xs"></div>
-          </div>
-
-          <!-- Запрос у партнёра -->
-          <div class="p-3 rounded-lg bg-[#e6d1a7]/80 border border-[#8a6424]/50 space-y-2">
-            <div id="tradePartnerTitle" class="font-historic font-bold text-sm text-[#754d17]">Вы запрашиваете</div>
-            <div class="flex items-center gap-2 text-xs">
-              <span>Деньги ($):</span>
-              <input id="tradePartnerCash" type="number" min="0" value="0" class="w-24 bg-[#f7efe0] border border-[#8a6424] rounded px-2 py-1 font-bold text-[#231911]">
-            </div>
-            <label id="tradePartnerJailLabel" class="hidden flex items-center gap-1.5 text-xs font-semibold text-[#231911]">
-              <input id="tradePartnerJailCheck" type="checkbox"> Запросить карту «Выйти из тюрьмы»
-            </label>
-            <div id="tradePartnerPropsList" class="space-y-1 max-h-40 overflow-y-auto text-xs"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex gap-2 pt-3 mt-3 border-t border-[#8a6424]/30">
-        <button onclick="executeTrade()" class="hist-btn btn-turquoise flex-1 py-2.5 rounded-lg font-historic font-bold text-sm">
-          ПОДТВЕРДИТЬ СДЕЛКУ ОБОИМИ ИГРОКАМИ
-        </button>
-        <button onclick="closeTradeModal()" class="hist-btn btn-gold px-4 py-2.5 rounded-lg font-bold text-xs">
-          Отмена
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- ==================== МОДАЛЬНОЕ ОКНО: АНТИКРИЗИСНЫЙ РЕЖИМ («Я НЕ МОГУ ЗАПЛАТИТЬ!») ==================== -->
   <div id="rescueModal" class="hidden fixed inset-0 z-[58] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xs">
     <div class="parchment-card corner-ornament w-full max-w-md rounded-xl p-5 shadow-2xl space-y-3 text-center">
@@ -726,9 +684,6 @@
       <div class="space-y-2 pt-1">
         <button onclick="openPortfolioModalFromRescue()" class="hist-btn btn-turquoise w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
           🏛️ Продать Дома/Отели или заложить улицы
-        </button>
-        <button onclick="openTradeModalFromRescue()" class="hist-btn btn-gold w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
-          🤝 Продать улицу другому игроку (Сделка)
         </button>
         <button id="settleDebtBtn" onclick="confirmSettleDebt()" class="hidden hist-btn btn-turquoise w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
           ✅ Оплатить долг и продолжить игру!
@@ -779,7 +734,7 @@
         <p><strong class="text-[#1d5753]">1. Старт и движение:</strong> Каждый игрок начинает на клетке <strong>«СТАРТ»</strong> с капиталом <strong>1500 $</strong>. За каждый проход или остановку на «СТАРТЕ» Банк выплачивает <strong>+200 $</strong>.</p>
         <p><strong class="text-[#754d17]">2. Покупка и Аукцион с 10 $:</strong> Остановившись на свободной улице, вокзале или коммунальном предприятии, вы можете купить их по номиналу. Если вы отказываетесь, Банкир проводит <strong>аукцион со стартовой ценой 10 $</strong> среди всех игроков.</p>
         <p><strong class="text-[#1d5753]">3. Равномерная застройка (32 Дома и 12 Отелей):</strong> Собрав все улицы одного цвета, вы получаете двойную ренту и можете строить <strong>Дома</strong> равномерно (нельзя поставить 2-й дом, пока на каждой улице группы нет хотя бы по 1 дому). После 4 Домов строится <strong>Отель</strong>.</p>
-        <p><strong class="text-[#754d17]">4. Сделки, залог и банкротство:</strong> В любой момент можно обмениваться улицами (без зданий), деньгами и картами выхода из тюрьмы. Заложить улицу можно за 50% цены (выкуп +10%). При нехватке денег сначала продайте здания за полцены или заложите улицы.</p>
+        <p><strong class="text-[#754d17]">4. Залог и банкротство:</strong> Заложить улицу можно за 50% цены (выкуп +10%). При нехватке денег сначала продайте здания за полцены или заложите улицы во вкладке «Активы».</p>
         <p><strong class="text-[#8f2d28]">5. Тюрьма:</strong> Три дубля подряд отправляют в Тюрьму. Выйти можно за 50 $, по карте «Выйти из тюрьмы бесплатно» или выбросив дубль (до 3 попыток).</p>
       </div>
       <button onclick="closeRulesModal()" class="hist-btn btn-turquoise w-full mt-5 py-3 rounded-lg font-historic font-bold text-sm">
@@ -1373,7 +1328,7 @@
       gameOver: false,
       bankHouses: 32,
       bankHotels: 12,
-      pendingDebt: null // { debtorId, creditorId, amount, reason }
+      pendingDebt: null
     };
 
     let auctionState = {
@@ -1391,13 +1346,22 @@
     function resizeBoardToFit() {
       const container = document.getElementById('boardContainer');
       const board = document.getElementById('boardGrid');
-      if (!container || !board) return;
+      const screen = document.getElementById('gameScreen');
+      if (!container || !board || !screen) return;
 
-      const rect = container.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
+      const isLandscape = window.innerWidth > window.innerHeight && window.innerWidth >= 480;
+      let size;
 
-      const size = Math.floor(Math.min(rect.width, rect.height) - 4);
-      if (size > 160) {
+      if (isLandscape) {
+        const rect = container.getBoundingClientRect();
+        size = Math.floor(Math.min(rect.width, rect.height) - 4);
+      } else {
+        const maxByWidth = window.innerWidth - 10;
+        const maxByHeight = Math.floor(window.innerHeight * 0.62);
+        size = Math.min(maxByWidth, maxByHeight);
+      }
+
+      if (size > 180) {
         board.style.width = `${size}px`;
         board.style.height = `${size}px`;
       }
@@ -1555,7 +1519,6 @@
       updateAllUI();
       requestAnimationFrame(resizeBoardToFit);
       setTimeout(resizeBoardToFit, 80);
-      addLog(`Игра началась! Участников: ${setupCount}. Стартовый капитал: 1500 $. В Банке: 32 Дома и 12 Отелей.`);
     }
 
     function getGridCoords(tileId) {
@@ -1584,14 +1547,18 @@
 
         if (isCorner) {
           div.innerHTML = `
-            ${renderSpecialTileIcon(tile, 'w-6 h-6 sm:w-9 sm:h-9', 'text-sm sm:text-xl')}
-            <div class="tile-name font-historic text-[6.5px] sm:text-[9.5px] text-[#231911] mt-0.5">${tile.name}</div>
+            <div class="flex-1 flex items-center justify-center w-full overflow-hidden">
+              ${renderSpecialTileIcon(tile, 'w-7 h-7 sm:w-11 sm:h-11', 'text-base sm:text-2xl')}
+            </div>
+            <div class="tile-name font-historic text-[7px] sm:text-[10.5px] font-extrabold text-[#140e09] w-full">${tile.name}</div>
             <div id="tokens-${tile.id}" class="tokens-container"></div>
           `;
         } else if (tile.type === 'city') {
           div.innerHTML = `
             <div id="bar-${tile.id}" class="color-bar" style="background:${tile.color};"></div>
-            <div class="tile-name">${tile.name}</div>
+            <div class="flex-1 flex items-center justify-center px-0.5">
+              <div class="tile-name">${tile.name}</div>
+            </div>
             <div id="price-${tile.id}" class="tile-price">${tile.price} $</div>
             <div id="owner-${tile.id}" class="owner-dot hidden"></div>
             <div id="tokens-${tile.id}" class="tokens-container"></div>
@@ -1599,9 +1566,11 @@
         } else {
           const priceLabel = tile.price ? `${tile.price} $` : (tile.amount ? `-${tile.amount} $` : '');
           div.innerHTML = `
-            <div class="pt-0.5">${renderSpecialTileIcon(tile, 'w-4 h-4 sm:w-6 sm:h-6', 'text-xs sm:text-base')}</div>
-            <div class="tile-name">${tile.name}</div>
-            <div id="price-${tile.id}" class="tile-price">${priceLabel}</div>
+            <div class="pt-1 shrink-0">${renderSpecialTileIcon(tile, 'w-5 h-5 sm:w-7 sm:h-7', 'text-sm sm:text-lg')}</div>
+            <div class="flex-1 flex items-center justify-center px-0.5">
+              <div class="tile-name">${tile.name}</div>
+            </div>
+            ${priceLabel ? `<div id="price-${tile.id}" class="tile-price">${priceLabel}</div>` : '<div class="h-1"></div>'}
             <div id="owner-${tile.id}" class="owner-dot hidden"></div>
             <div id="tokens-${tile.id}" class="tokens-container"></div>
           `;
@@ -1633,7 +1602,7 @@
         const ownedCount = Object.values(state.properties).filter(pr => pr.ownerId === p.id).length;
 
         const card = document.createElement('div');
-        card.className = `obsidian-panel rounded-lg p-1.5 sm:p-2 flex items-center justify-between gap-2 shrink-0 min-w-[132px] transition-all ${
+        card.className = `obsidian-panel rounded-lg p-2 flex items-center justify-between gap-2 shrink-0 min-w-[138px] transition-all ${
           isCurrent ? 'ring-1 ring-[#e2be6b] bg-[#292018]' : ''
         } ${p.bankrupt ? 'opacity-40 grayscale' : ''}`;
 
@@ -1828,7 +1797,6 @@
         if (isDouble) {
           p.inJail = false;
           p.jailTurns = 0;
-          addLog(`${p.name} выбросил дубль (${d1}:${d2}) и вышел из Тюрьмы!`, 'text-[#6ec2bc]');
           state.doublesCount = 0;
           await movePlayerSteps(p, sum);
           state.hasRolled = true;
@@ -1837,7 +1805,6 @@
         } else {
           p.jailTurns++;
           if (p.jailTurns >= 3) {
-            addLog(`${p.name} не выбросил дубль за 3 хода, заплатил 50 $ и вышел из Тюрьмы.`, 'text-[#e2be6b]');
             p.inJail = false;
             p.jailTurns = 0;
             requestPayment(p, null, 50, 'Штраф за выход из Тюрьмы');
@@ -1845,7 +1812,7 @@
               await movePlayerSteps(p, sum);
             }
           } else {
-            addLog(`${p.name} остаётся в Тюрьме (попытка ${p.jailTurns}/3).`);
+            setStatus(`${p.name} в Тюрьме (попытка ${p.jailTurns}/3).`);
           }
           state.hasRolled = true;
           state.isAnimating = false;
@@ -1857,7 +1824,7 @@
       if (isDouble) {
         state.doublesCount++;
         if (state.doublesCount >= 3) {
-          addLog(`Три дубля подряд! ${p.name} отправляется в Тюрьму.`, 'text-[#e06c65]');
+          setStatus(`Три дубля подряд! ${p.name} отправляется в Тюрьму.`);
           sendPlayerToJail(p);
           state.hasRolled = true;
           state.isAnimating = false;
@@ -1873,7 +1840,6 @@
       if (isDouble && !p.inJail && !p.bankrupt && !state.pendingDebt) {
         state.hasRolled = false;
         setStatus(`Дубль! ${p.name} бросает кубики ещё раз.`);
-        addLog(`${p.name} выбросил дубль и ходит снова!`, 'text-[#6ec2bc]');
       } else {
         state.hasRolled = true;
       }
@@ -1891,7 +1857,6 @@
         sfx.step();
         if (dir > 0 && player.position === 0) {
           changeMoney(player, 200);
-          addLog(`${player.name} прошёл поле «СТАРТ» и получил +200 $!`, 'text-[#e2be6b]');
         }
         renderBoardState();
         renderPlayersHUD();
@@ -1903,7 +1868,6 @@
 
     async function resolveTileLanding(player, lastDiceSum) {
       const tile = BOARD_TILES[player.position];
-      addLog(`${player.name} остановился на «${tile.name}».`);
 
       if (tile.type === 'start') {
         setStatus(`${player.name} на поле «СТАРТ» (+200 $).`);
@@ -1919,13 +1883,11 @@
       }
       else if (tile.type === 'gotojail') {
         setStatus(`Отправляйся в Тюрьму! ${player.name} заключён под стражу.`);
-        addLog(`${player.name} отправлен в Тюрьму!`, 'text-[#e06c65]');
         sendPlayerToJail(player);
         openCityModal(tile.id, { type: 'info', notice: 'Вы в Тюрьме. Выйти можно за 50 $, по карточке свободы или выбросив дубль.' });
       }
       else if (tile.type === 'tax') {
         setStatus(`${player.name}: оплата налога ${tile.amount} $.`);
-        addLog(`${player.name} должен уплатить налог ${tile.amount} $ (${tile.name}).`, 'text-[#e06c65]');
         const paid = requestPayment(player, null, tile.amount, tile.name);
         if (paid) {
           openCityModal(tile.id, { type: 'info', notice: `Уплачен налог в Банк: -${tile.amount} $.` });
@@ -1956,7 +1918,6 @@
           } else {
             const rent = calculateRent(tile, prop, lastDiceSum);
             setStatus(`${player.name}: рента ${rent} $ игроку ${owner.name}.`);
-            addLog(`${player.name} платит ренту ${rent} $ игроку ${owner.name} за «${tile.name}».`, 'text-[#e2be6b]');
             const paid = requestPayment(player, owner, rent, `Рента за «${tile.name}»`);
             if (paid) {
               openCityModal(tile.id, {
@@ -2129,7 +2090,6 @@
 
       changeMoney(player, -tile.price);
       prop.ownerId = player.id;
-      addLog(`${player.name} купил «${tile.name}» за ${tile.price} $!`, 'text-[#6ec2bc]');
       setStatus(`${player.name} приобрёл «${tile.name}»!`);
 
       closeCityModal();
@@ -2144,7 +2104,7 @@
       const tile = BOARD_TILES[tileId];
 
       if (activePlayers.length === 0) {
-        addLog(`На аукционе за «${tile.name}» не нашлось покупателей со стартовой суммой 10 $.`, 'text-[#a8947a]');
+        setStatus(`На аукционе за «${tile.name}» не нашлось покупателей.`);
         return;
       }
 
@@ -2158,7 +2118,6 @@
         turnIndex: 0
       };
 
-      addLog(`🔨 Банкир открыл аукцион на «${tile.name}»! Стартовая цена: 10 $.`, 'text-[#e2be6b]');
       renderAuctionModal();
       document.getElementById('auctionModal').classList.remove('hidden');
     }
@@ -2234,162 +2193,15 @@
         const winner = state.players[auctionState.leaderId];
         changeMoney(winner, -auctionState.currentBid);
         state.properties[tile.id].ownerId = winner.id;
-        addLog(`🏆 ${winner.name} выиграл аукцион на «${tile.name}» за ${auctionState.currentBid} $!`, 'text-[#6ec2bc]');
         setStatus(`${winner.name} купил «${tile.name}» на аукционе за ${auctionState.currentBid} $!`);
       } else {
-        addLog(`Аукцион на «${tile.name}» завершён без покупателей.`, 'text-[#a8947a]');
+        setStatus(`Аукцион на «${tile.name}» завершён без покупателей.`);
       }
       updateAllUI();
     }
 
     /* ==========================================================================
-       11. СДЕЛКИ И ОБМЕН МЕЖДУ ИГРОКАМИ (В ЛЮБОЙ МОМЕНТ ИГРЫ)
-       ========================================================================== */
-    function openTradeModal() {
-      const me = state.players[state.currentPlayerIndex];
-      const partners = state.players.filter(p => !p.bankrupt && p.id !== me.id);
-      if (partners.length === 0) return;
-
-      sfx.click();
-      const select = document.getElementById('tradePartnerSelect');
-      select.innerHTML = '';
-      partners.forEach(pt => {
-        const opt = document.createElement('option');
-        opt.value = pt.id;
-        opt.textContent = `${pt.name} (${pt.money} $)`;
-        select.appendChild(opt);
-      });
-
-      document.getElementById('tradeMyCash').value = 0;
-      document.getElementById('tradePartnerCash').value = 0;
-      renderTradeLists();
-      document.getElementById('tradeModal').classList.remove('hidden');
-    }
-
-    function closeTradeModal() {
-      sfx.click();
-      document.getElementById('tradeModal').classList.add('hidden');
-      if (state.pendingDebt) {
-        openRescueModal();
-      } else {
-        updateAllUI();
-      }
-    }
-
-    function renderTradeLists() {
-      const me = state.players[state.currentPlayerIndex];
-      const partnerId = parseInt(document.getElementById('tradePartnerSelect').value, 10);
-      const partner = state.players[partnerId];
-      if (!partner) return;
-
-      document.getElementById('tradeMyTitle').textContent = `Предлагает ${me.name} (баланс: ${me.money} $)`;
-      document.getElementById('tradePartnerTitle').textContent = `Отдаёт ${partner.name} (баланс: ${partner.money} $)`;
-
-      const myJailLbl = document.getElementById('tradeMyJailLabel');
-      const myJailChk = document.getElementById('tradeMyJailCheck');
-      myJailChk.checked = false;
-      if (me.jailCards > 0) myJailLbl.classList.remove('hidden');
-      else myJailLbl.classList.add('hidden');
-
-      const ptJailLbl = document.getElementById('tradePartnerJailLabel');
-      const ptJailChk = document.getElementById('tradePartnerJailCheck');
-      ptJailChk.checked = false;
-      if (partner.jailCards > 0) ptJailLbl.classList.remove('hidden');
-      else ptJailLbl.classList.add('hidden');
-
-      renderPlayerTradableProps(me.id, 'tradeMyPropsList', 'my-trade-prop');
-      renderPlayerTradableProps(partner.id, 'tradePartnerPropsList', 'pt-trade-prop');
-    }
-
-    function renderPlayerTradableProps(playerId, containerId, inputName) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-
-      const owned = BOARD_TILES.filter(t => state.properties[t.id] && state.properties[t.id].ownerId === playerId);
-      if (owned.length === 0) {
-        container.innerHTML = '<div class="text-[#5a4634] italic">Нет собственности</div>';
-        return;
-      }
-
-      owned.forEach(tile => {
-        const prop = state.properties[tile.id];
-        const blockedByBuildings = tile.type === 'city' && groupHasAnyBuildings(tile.group);
-        const label = document.createElement('label');
-        label.className = `flex items-center gap-1.5 p-1 rounded border border-[#8a6424]/30 bg-[#f7efe0] ${blockedByBuildings ? 'opacity-50' : 'cursor-pointer'}`;
-        label.innerHTML = `
-          <input type="checkbox" name="${inputName}" value="${tile.id}" ${blockedByBuildings ? 'disabled' : ''}>
-          <span class="w-2.5 h-2.5 rounded-xs shrink-0" style="background:${tile.color || '#2a7b76'}"></span>
-          <span class="font-semibold text-[#231911] truncate">${tile.name}</span>
-          ${prop.mortgaged ? '<span class="text-[10px] text-[#8f2d28] font-bold">[ЗАЛОГ]</span>' : ''}
-          ${blockedByBuildings ? '<span class="text-[10px] text-[#8f2d28]">(есть здания)</span>' : ''}
-        `;
-        container.appendChild(label);
-      });
-    }
-
-    function executeTrade() {
-      const me = state.players[state.currentPlayerIndex];
-      const partnerId = parseInt(document.getElementById('tradePartnerSelect').value, 10);
-      const partner = state.players[partnerId];
-
-      const myCash = Math.max(0, parseInt(document.getElementById('tradeMyCash').value, 10) || 0);
-      const ptCash = Math.max(0, parseInt(document.getElementById('tradePartnerCash').value, 10) || 0);
-
-      if (myCash > me.money || ptCash > partner.money) {
-        setStatus('У одного из участников сделки недостаточно денег!');
-        return;
-      }
-
-      const myPropIds = Array.from(document.querySelectorAll('input[name="my-trade-prop"]:checked')).map(el => parseInt(el.value, 10));
-      const ptPropIds = Array.from(document.querySelectorAll('input[name="pt-trade-prop"]:checked')).map(el => parseInt(el.value, 10));
-      const giveJail = document.getElementById('tradeMyJailCheck').checked && me.jailCards > 0;
-      const takeJail = document.getElementById('tradePartnerJailCheck').checked && partner.jailCards > 0;
-
-      if (myCash === 0 && ptCash === 0 && myPropIds.length === 0 && ptPropIds.length === 0 && !giveJail && !takeJail) {
-        setStatus('Выберите хотя бы один предмет или сумму для обмена.');
-        return;
-      }
-
-      // Перевод денег
-      if (myCash > 0) {
-        changeMoney(me, -myCash);
-        changeMoney(partner, myCash);
-      }
-      if (ptCash > 0) {
-        changeMoney(partner, -ptCash);
-        changeMoney(me, ptCash);
-      }
-
-      // Перевод карт свободы
-      if (giveJail) { me.jailCards--; partner.jailCards++; }
-      if (takeJail) { partner.jailCards--; me.jailCards++; }
-
-      // Передача собственности + правило 10% за заложенную недвижимость при смене владельца
-      myPropIds.forEach(id => {
-        state.properties[id].ownerId = partner.id;
-        if (state.properties[id].mortgaged) {
-          const fee = Math.ceil((BOARD_TILES[id].price / 2) * 0.1);
-          changeMoney(partner, -fee);
-          addLog(`${partner.name} уплатил в Банк 10% (${fee} $) за заложенную улицу «${BOARD_TILES[id].name}».`);
-        }
-      });
-
-      ptPropIds.forEach(id => {
-        state.properties[id].ownerId = me.id;
-        if (state.properties[id].mortgaged) {
-          const fee = Math.ceil((BOARD_TILES[id].price / 2) * 0.1);
-          changeMoney(me, -fee);
-          addLog(`${me.name} уплатил в Банк 10% (${fee} $) за заложенную улицу «${BOARD_TILES[id].name}».`);
-        }
-      });
-
-      sfx.coinGain();
-      addLog(`🤝 Заключена сделка между ${me.name} и ${partner.name}!`, 'text-[#6ec2bc]');
-      closeTradeModal();
-    }
-
-    /* ==========================================================================
-       12. КАРТОЧКИ «ШАНС» И «МИРОВОЙ ФОНД»
+       11. КАРТОЧКИ «ШАНС» И «МИРОВОЙ ФОНД»
        ========================================================================== */
     let pendingCardCallback = null;
 
@@ -2404,7 +2216,6 @@
 
         pendingCardCallback = async () => {
           document.getElementById('eventCardModal').classList.add('hidden');
-          addLog(`${deckTitle}: ${player.name} — «${card.title}».`, 'text-[#e2be6b]');
 
           if (card.action === 'money') {
             if (card.value >= 0) changeMoney(player, card.value);
@@ -2466,7 +2277,7 @@
     }
 
     /* ==========================================================================
-       13. ТЮРЬМА, ДЕНЬГИ, ДОЛГИ И БАНКРОТСТВО (ОФИЦИАЛЬНЫЕ ПРАВИЛА)
+       12. ТЮРЬМА, ДЕНЬГИ, ДОЛГИ И БАНКРОТСТВО (ОФИЦИАЛЬНЫЕ ПРАВИЛА)
        ========================================================================== */
     function sendPlayerToJail(player) {
       sfx.jail();
@@ -2483,7 +2294,6 @@
       changeMoney(p, -50);
       p.inJail = false;
       p.jailTurns = 0;
-      addLog(`${p.name} заплатил 50 $ и вышел из Тюрьмы.`, 'text-[#6ec2bc]');
       setStatus(`${p.name} вышел из Тюрьмы! Бросайте кубики.`);
       updateAllUI();
     }
@@ -2495,7 +2305,6 @@
       p.inJail = false;
       p.jailTurns = 0;
       sfx.scrollOpen();
-      addLog(`${p.name} использовал карточку «Выйти из тюрьмы бесплатно»!`, 'text-[#6ec2bc]');
       setStatus(`${p.name} на свободе! Бросайте кубики.`);
       updateAllUI();
     }
@@ -2521,7 +2330,6 @@
         return true;
       }
 
-      // Не хватает денег -> включаем антикризисный режим «На помощь! Я не могу заплатить!»
       state.pendingDebt = {
         debtorId: debtor.id,
         creditorId: creditor ? creditor.id : null,
@@ -2540,7 +2348,7 @@
       const creditorName = debt.creditorId !== null ? state.players[debt.creditorId].name : 'Банку';
 
       document.getElementById('rescueInfoText').textContent =
-        `${debtor.name} должен выплатить ${debt.amount} $ (${creditorName}) за «${debt.reason}», но на счёте только ${debtor.money} $. Продайте здания за полцены, заложите улицы или заключите сделку!`;
+        `${debtor.name} должен выплатить ${debt.amount} $ (${creditorName}) за «${debt.reason}», но на счёте только ${debtor.money} $. Продайте здания за полцены или заложите улицы!`;
 
       const settleBtn = document.getElementById('settleDebtBtn');
       if (debtor.money >= debt.amount) {
@@ -2558,11 +2366,6 @@
       openPortfolioModal();
     }
 
-    function openTradeModalFromRescue() {
-      document.getElementById('rescueModal').classList.add('hidden');
-      openTradeModal();
-    }
-
     function confirmSettleDebt() {
       if (!state.pendingDebt) return;
       const debt = state.pendingDebt;
@@ -2573,7 +2376,7 @@
       if (debt.creditorId !== null) {
         changeMoney(state.players[debt.creditorId], debt.amount);
       }
-      addLog(`✅ ${debtor.name} собрал средства и погасил долг ${debt.amount} $!`, 'text-[#6ec2bc]');
+      setStatus(`${debtor.name} погасил долг ${debt.amount} $!`);
       state.pendingDebt = null;
       document.getElementById('rescueModal').classList.add('hidden');
       updateAllUI();
@@ -2607,7 +2410,6 @@
       const leftoverCash = Math.max(0, player.money);
       player.money = 0;
 
-      // Сначала возвращаем все здания в Банк
       Object.keys(state.properties).forEach(tileId => {
         const pr = state.properties[tileId];
         if (pr.ownerId === player.id && pr.houses > 0) {
@@ -2618,7 +2420,6 @@
       });
 
       if (creditor && !creditor.bankrupt) {
-        // Остался должен другому игроку: передаём деньги, карточки выхода из тюрьмы и собственность
         if (leftoverCash > 0) changeMoney(creditor, leftoverCash);
         creditor.jailCards += player.jailCards;
         player.jailCards = 0;
@@ -2633,9 +2434,8 @@
             }
           }
         });
-        addLog(`💥 ${player.name} обанкротился! Все активы перешли игроку ${creditor.name}.`, 'text-[#e06c65]');
+        setStatus(`${player.name} обанкротился! Активы перешли к ${creditor.name}.`);
       } else {
-        // Остался должен Банку: собственность освобождается от залога
         player.jailCards = 0;
         Object.keys(state.properties).forEach(tileId => {
           const pr = state.properties[tileId];
@@ -2645,7 +2445,7 @@
             pr.mortgaged = false;
           }
         });
-        addLog(`💥 ${player.name} обанкротился! Вся его собственность возвращена в Банк.`, 'text-[#e06c65]');
+        setStatus(`${player.name} обанкротился! Собственность вернулась в Банк.`);
       }
 
       const activePlayers = state.players.filter(pl => !pl.bankrupt);
@@ -2663,7 +2463,7 @@
     }
 
     /* ==========================================================================
-       14. УПРАВЛЕНИЕ АКТИВАМИ: РАВНОМЕРНЫЕ ДОМА/ОТЕЛИ (32/12) И ЗАЛОГ
+       13. УПРАВЛЕНИЕ АКТИВАМИ: РАВНОМЕРНЫЕ ДОМА/ОТЕЛИ (32/12) И ЗАЛОГ
        ========================================================================== */
     function openPortfolioModal() {
       sfx.click();
@@ -2688,11 +2488,9 @@
       if (groupHasAnyMortgage(tile.group)) return false;
       if (prop.houses >= 5) return false;
 
-      // Проверяем лимит Банка (32 дома, 12 отелей)
       if (prop.houses < 4 && state.bankHouses <= 0) return false;
       if (prop.houses === 4 && state.bankHotels <= 0) return false;
 
-      // Правило равномерной застройки: нельзя строить, если на этой улице уже больше домов, чем на другой в группе
       const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === tile.group);
       const minHouses = Math.min(...groupTiles.map(t => state.properties[t.id].houses));
       return prop.houses === minHouses;
@@ -2701,10 +2499,8 @@
     function canSellEvenly(tile) {
       const prop = state.properties[tile.id];
       if (tile.type !== 'city' || prop.houses <= 0) return false;
-      // При продаже отеля в Банке должно быть минимум 4 дома на замену
       if (prop.houses === 5 && state.bankHouses < 4) return false;
 
-      // Правило равномерной продажи
       const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === tile.group);
       const maxHouses = Math.max(...groupTiles.map(t => state.properties[t.id].houses));
       return prop.houses === maxHouses;
@@ -2790,15 +2586,12 @@
 
       changeMoney(player, -tile.buildCost);
       if (prop.houses === 4) {
-        // Обмен 4 домов на 1 отель
         state.bankHouses += 4;
         state.bankHotels -= 1;
         prop.houses = 5;
-        addLog(`🏨 ${player.name} обменял 4 Дома на Отель в городе ${tile.name}!`, 'text-[#6ec2bc]');
       } else {
         state.bankHouses -= 1;
         prop.houses++;
-        addLog(`🏠 ${player.name} построил Дом (${prop.houses}/4) в городе ${tile.name}!`, 'text-[#6ec2bc]');
       }
       renderPortfolioList();
       renderBoardState();
@@ -2814,11 +2607,9 @@
         state.bankHotels += 1;
         state.bankHouses -= 4;
         prop.houses = 4;
-        addLog(`${player.name} продал Отель Банку в городе ${tile.name} и получил 4 Дома взамен.`);
       } else {
         state.bankHouses += 1;
         prop.houses--;
-        addLog(`${player.name} продал Дом Банку в городе ${tile.name}.`);
       }
       changeMoney(player, Math.floor(tile.buildCost / 2));
       renderPortfolioList();
@@ -2837,19 +2628,17 @@
       if (!prop.mortgaged) {
         prop.mortgaged = true;
         changeMoney(player, mortgageVal);
-        addLog(`${player.name} заложил «${tile.name}» за ${mortgageVal} $.`, 'text-[#e2be6b]');
       } else {
         if (player.money < unmortgageCost) return;
         prop.mortgaged = false;
         changeMoney(player, -unmortgageCost);
-        addLog(`${player.name} выкупил «${tile.name}» из залога за ${unmortgageCost} $.`, 'text-[#6ec2bc]');
       }
       renderPortfolioList();
       renderBoardState();
     }
 
     /* ==========================================================================
-       15. ПЕРЕХОД ХОДА И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+       14. ПЕРЕХОД ХОДА И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
        ========================================================================== */
     function endTurn() {
       if (state.isAnimating || state.gameOver || state.pendingDebt) return;
@@ -2867,7 +2656,6 @@
 
       const nextPlayer = state.players[nextIdx];
       setStatus(`Ходит ${nextPlayer.name}. Бросайте кубики!`);
-      addLog(`--- Ход переходит к игроку ${nextPlayer.name} ---`, 'text-[#a8947a]');
       updateAllUI();
     }
 
@@ -2880,14 +2668,6 @@
 
     function setStatus(text) {
       document.getElementById('statusMessage').textContent = text;
-    }
-
-    function addLog(text, colorClass = 'text-[#dfd0b8]') {
-      const log = document.getElementById('gameLog');
-      const item = document.createElement('div');
-      item.className = colorClass;
-      item.textContent = text;
-      log.prepend(item);
     }
 
     function openRulesModal() {

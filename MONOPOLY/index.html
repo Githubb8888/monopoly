@@ -1070,12 +1070,24 @@
     initCloudConnection();
   </script>
 
- <script>
+<script>
     /* ==========================================================================
-0. КОНФИГУРАЦИЯ ЛОКАЛЬНЫХ ФОТО И ИКОНОК ИЗ ПАПКИ Images/
+0. КОНФИГУРАЦИЯ ЛОКАЛЬНЫХ ФОТО, ИКОНОК И ЗВУКОВ (Images/ и Sounds/)
        ========================================================================== */
     const ASSET_CONFIG = {
       folder: 'Images',
+      soundFolder: 'Sounds',
+      sounds: {
+        jail: 'faaah.mp3',
+        buy: 'applepay.mp3',
+        bigRent: 'movie_1.mp3',
+        smallRent: 'oh-my-god-meme.mp3',
+        goodProfit: 'du-bist-gut-genug.mp3',
+        badMinus: 'capcut-explosion-sound.mp3',
+        double: 'anime-wow-sound-effect.mp3',
+        tax: 'cat-laugh-meme-1.mp3',
+        auction: 'dexter-meme.mp3'
+      },
       cityImages: {
         0: 'Start.jpeg',
         1: 'kair.jpeg',
@@ -1145,7 +1157,7 @@
     }
 
     /* ==========================================================================
-1. ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API)
+1. ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API + МЕМЫ ИЗ ПАПКИ Sounds/)
        ========================================================================== */
     class HistoricSoundEngine {
       constructor() {
@@ -1160,6 +1172,42 @@
         }
         if (this.ctx && this.ctx.state === 'suspended') {
           this.ctx.resume();
+        }
+      }
+
+     playCustom(soundKey) {
+        if (!this.enabled) return false;
+        const filename = ASSET_CONFIG.sounds?.[soundKey];
+        if (!filename) return false;
+
+        try {
+          // Останавливаем предыдущий мем-звук, если он ещё играет
+          if (this.currentCustomAudio) {
+            this.currentCustomAudio.pause();
+            this.currentCustomAudio.currentTime = 0;
+            clearTimeout(this.customStopTimer);
+          }
+
+          const audio = new Audio(`${ASSET_CONFIG.soundFolder}/${encodeURIComponent(filename)}`);
+          audio.volume = 0.85;
+          this.currentCustomAudio = audio;
+          audio.play().catch(() => {});
+
+          // Ограничение длительности для конкретных звуков (в миллисекундах)
+          const maxDurations = {
+            goodProfit: 4500 // du-bist-gut-genug.mp3 — остановится ровно через 4.5 сек
+          };
+
+          if (maxDurations[soundKey]) {
+            this.customStopTimer = setTimeout(() => {
+              audio.pause();
+              audio.currentTime = 0;
+            }, maxDurations[soundKey]);
+          }
+
+          return true;
+        } catch (_) {
+          return false;
         }
       }
 
@@ -1211,6 +1259,7 @@
       }
 
       jail() {
+        if (this.playCustom('jail')) return;
         this.tone(146.83, 'sawtooth', 0.25, 0.09, 0);
         this.tone(110.00, 'sawtooth', 0.35, 0.09, 0.2);
       }
@@ -1222,6 +1271,12 @@
     }
 
     const sfx = new HistoricSoundEngine();
+
+    function triggerSharedSound(soundKey) {
+      if (!soundKey) return;
+      sfx.playCustom(soundKey);
+      state.soundEvent = { key: soundKey, id: Date.now() + Math.random() };
+    }
 
     /* ==========================================================================
 2. ДАННЫЕ ПОЛЯ: 40 КЛЕТОК (ГОРОДА МИРА + ИНТЕРЕСНЫЕ ФАКТЫ)
@@ -1655,7 +1710,7 @@
       myAvatarIdx: 0,
       unsubscribe: null,
       lastVersion: 0,
-      lastDiceAnimId: 0,
+      lastSoundEventId: 0,
       peer: null,
       hostConn: null,
       clientConns: [],
@@ -1677,6 +1732,7 @@
       diceRollId: 0,
       statusText: 'Бросьте кубики, чтобы сделать ход',
       sharedModal: null,
+      soundEvent: null,
       version: 0
     };
 
@@ -2157,6 +2213,7 @@
         diceRollId: 0,
         statusText: `Ходит ${newPlayers[0].name}. Бросайте кубики!`,
         sharedModal: null,
+        soundEvent: null,
         version: 1
       };
 
@@ -2237,6 +2294,11 @@
 
       onlineState.lastVersion = incoming.version || 0;
       state = incoming;
+
+      if (state.soundEvent && state.soundEvent.id !== onlineState.lastSoundEventId) {
+        onlineState.lastSoundEventId = state.soundEvent.id;
+        sfx.playCustom(state.soundEvent.key);
+      }
 
       if (state.lastDice && state.lastDice.length === 2) {
         renderDice(state.lastDice[0], state.lastDice[1], false);
@@ -2464,6 +2526,7 @@
       state.bankHotels = 12;
       state.pendingDebt = null;
       state.sharedModal = null;
+      state.soundEvent = null;
 
       for (let i = 0; i < setupCount; i++) {
         const cfg = setupConfigs[i];
@@ -2791,6 +2854,10 @@
       const isDouble = d1 === d2;
       const sum = d1 + d2;
       setStatus(`${p.name}: выпало ${d1} и ${d2} (сумма ${sum})${isDouble ? ' — ДУБЛЬ!' : ''}`);
+
+      if (isDouble && !(p.inJail) && state.doublesCount < 2) {
+        triggerSharedSound('double');
+      }
       await pushCloudGameState();
 
       if (p.inJail) {
@@ -2798,6 +2865,7 @@
           p.inJail = false;
           p.jailTurns = 0;
           state.doublesCount = 0;
+          triggerSharedSound('goodProfit');
           await movePlayerSteps(p, sum);
           state.hasRolled = true;
           state.isAnimating = false;
@@ -2861,6 +2929,7 @@
         sfx.step();
         if (dir > 0 && player.position === 0) {
           changeMoney(player, 200);
+          triggerSharedSound('goodProfit');
         }
         renderBoardState();
         renderPlayersHUD();
@@ -2892,6 +2961,7 @@
         openCityModal(tile.id, { type: 'info', notice: 'Вы в Тюрьме. Выйти можно за 50 $, по карточке свободы или выбросив дубль.' });
       }
       else if (tile.type === 'tax') {
+        triggerSharedSound('tax');
         setStatus(`${player.name}: оплата налога ${tile.amount} $.`);
         const paid = requestPayment(player, null, tile.amount, tile.name);
         if (paid) {
@@ -2922,6 +2992,12 @@
             openCityModal(tile.id, { type: 'info', notice: `Собственность игрока ${owner.name} заложена — рента не взимается.` });
           } else {
             const rent = calculateRent(tile, prop, lastDiceSum);
+            // Крупная рента (от 200$ или если есть дома/отель) -> movie_1.mp3, обычная -> oh-my-god-meme.mp3
+            if (rent >= 200 || (prop.houses && prop.houses > 0)) {
+              triggerSharedSound('bigRent');
+            } else {
+              triggerSharedSound('smallRent');
+            }
             setStatus(`${player.name}: рента ${rent} $ игроку ${owner.name}.`);
             const paid = requestPayment(player, owner, rent, `Рента за «${tile.name}»`);
             if (paid) {
@@ -3111,6 +3187,7 @@
       changeMoney(player, -tile.price);
       prop.ownerId = player.id;
       state.sharedModal = null;
+      triggerSharedSound('buy');
       setStatus(`${player.name} приобрёл «${tile.name}»!`);
 
       document.getElementById('cityModal').classList.add('hidden');
@@ -3132,7 +3209,7 @@
         return;
       }
 
-      sfx.scrollOpen();
+      triggerSharedSound('auction');
       auctionState = {
         active: true,
         tileId,
@@ -3231,6 +3308,7 @@
         const winner = state.players[auctionState.leaderId];
         changeMoney(winner, -auctionState.currentBid);
         state.properties[tile.id].ownerId = winner.id;
+        triggerSharedSound('buy');
         setStatus(`${winner.name} купил «${tile.name}» на аукционе за ${auctionState.currentBid} $!`);
       } else {
         setStatus(`Аукцион на «${tile.name}» завершён без покупателей.`);
@@ -3246,7 +3324,20 @@
 
     function showAndExecuteEventCard(player, deckTitle, card) {
       return new Promise(resolve => {
-        sfx.scrollOpen();
+        const isNegativeMinus =
+          card.action === 'repairs' ||
+          card.action === 'payAll' ||
+          card.action === 'moveRel' ||
+          (card.action === 'money' && card.value < 0);
+
+        if (card.action === 'jail') {
+          triggerSharedSound('jail'); // faaah.mp3
+        } else if (isNegativeMinus) {
+          triggerSharedSound('badMinus'); // capcut-explosion-sound.mp3
+        } else {
+          triggerSharedSound('goodProfit'); // du-bist-gut-genug.mp3
+        }
+
         document.getElementById('eventCardIcon').textContent = card.icon;
         document.getElementById('eventCardDeck').textContent = deckTitle;
         document.getElementById('eventCardTitle').textContent = card.title;
@@ -3335,7 +3426,7 @@
 12. ТЮРЬМА, ДЕНЬГИ, ДОЛГИ И БАНКРОТСТВО (ОФИЦИАЛЬНЫЕ ПРАВИЛА)
        ========================================================================== */
     function sendPlayerToJail(player) {
-      sfx.jail();
+      triggerSharedSound('jail'); // faaah.mp3 при реальном аресте
       player.position = 10;
       player.inJail = true;
       player.jailTurns = 0;
@@ -3362,7 +3453,7 @@
       p.jailCards--;
       p.inJail = false;
       p.jailTurns = 0;
-      sfx.scrollOpen();
+      triggerSharedSound('goodProfit');
       setStatus(`${p.name} на свободе! Бросайте кубики.`);
       updateAllUI();
       pushCloudGameState();
@@ -3389,6 +3480,7 @@
         return true;
       }
 
+      triggerSharedSound('badMinus');
       state.pendingDebt = {
         debtorId: debtor.id,
         creditorId: creditor ? creditor.id : null,
@@ -3469,6 +3561,7 @@
     }
 
     function handleBankruptcy(player, creditor = null) {
+      triggerSharedSound('badMinus');
       player.bankrupt = true;
       const leftoverCash = Math.max(0, player.money);
       player.money = 0;
@@ -3649,6 +3742,7 @@
       if (!canBuildEvenly(tile) || player.money < tile.buildCost) return;
 
       changeMoney(player, -tile.buildCost);
+      triggerSharedSound('buy');
       if (prop.houses === 4) {
         state.bankHouses += 4;
         state.bankHotels -= 1;

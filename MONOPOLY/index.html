@@ -1,0 +1,2928 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Монополия: Великие Города Мира</title>
+  <!-- Исторические шрифты с поддержкой кириллицы -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --obsidian: #120f0c;
+      --obsidian-soft: #1b1612;
+      --parchment: #f2e6cf;
+      --parchment-dark: #e2cfa8;
+      --parchment-deep: #d4bc8d;
+      --ink: #231911;
+      --ink-muted: #5a4634;
+      --bronze: #8a6424;
+      --gold: #c59b43;
+      --gold-light: #e2be6b;
+      --turquoise: #2a7b76;
+      --turquoise-dark: #1d5753;
+      --crimson: #8f2d28;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--obsidian);
+      background-image:
+        radial-gradient(circle at 50% 35%, rgba(197, 155, 67, 0.08), transparent 65%),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 2px, transparent 2px, transparent 10px);
+      color: var(--parchment);
+      font-family: 'Lora', Georgia, serif;
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .font-historic {
+      font-family: 'Cormorant Garamond', 'Cinzel', Georgia, serif;
+      letter-spacing: 0.03em;
+    }
+
+    /* Текстура пергаментной панели */
+    .parchment-card {
+      background: linear-gradient(165deg, var(--parchment) 0%, var(--parchment-dark) 100%);
+      color: var(--ink);
+      border: 2px solid var(--bronze);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.75),
+        inset 0 0 24px rgba(138, 100, 36, 0.22);
+      position: relative;
+    }
+
+    /* Тёмная обсидиановая панель с бронзовой каймой */
+    .obsidian-panel {
+      background: linear-gradient(180deg, rgba(29, 23, 18, 0.96), rgba(18, 15, 12, 0.98));
+      border: 1.5px solid rgba(197, 155, 67, 0.45);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), inset 0 0 14px rgba(197, 155, 67, 0.06);
+    }
+
+    /* Угловой орнамент */
+    .corner-ornament {
+      position: relative;
+    }
+    .corner-ornament::before,
+    .corner-ornament::after {
+      content: "❖";
+      position: absolute;
+      font-size: 11px;
+      color: var(--bronze);
+      opacity: 0.75;
+      pointer-events: none;
+    }
+    .corner-ornament::before { top: 4px; left: 6px; }
+    .corner-ornament::after { bottom: 4px; right: 6px; }
+
+    /* Кнопки */
+    .hist-btn {
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+    .hist-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+    .hist-btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+    .hist-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .btn-gold {
+      background: linear-gradient(180deg, #d7ae54 0%, #a67c2e 100%);
+      color: #1a120b;
+      border: 1px solid #f0d38c;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .btn-turquoise {
+      background: linear-gradient(180deg, #34918b 0%, #21635f 100%);
+      color: #f7efe0;
+      border: 1px solid #6ec2bc;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .btn-bronze-outline {
+      background: rgba(34, 27, 21, 0.9);
+      color: var(--parchment);
+      border: 1px solid var(--gold);
+    }
+
+    .btn-crimson {
+      background: linear-gradient(180deg, #a83832 0%, #78211c 100%);
+      color: #f7efe0;
+      border: 1px solid #e07a74;
+    }
+
+    /* Адаптивная раскладка игрового экрана (портрет и альбом / rotate) */
+    #gameScreen {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100dvh;
+      padding: 6px;
+      gap: 6px;
+    }
+
+    @media (min-width: 1024px), (orientation: landscape) and (min-width: 560px) {
+      #gameScreen {
+        flex-direction: row;
+        align-items: stretch;
+        padding: 8px;
+        gap: 8px;
+      }
+      #leftHudPanel {
+        width: clamp(190px, 23vw, 290px);
+        flex-direction: column !important;
+      }
+      #playersHudList {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        max-height: none !important;
+      }
+      #rightLogPanel {
+        width: clamp(175px, 21vw, 280px);
+        max-height: none !important;
+      }
+    }
+
+    /* Сетка игрового поля 11x11 (точный размер задаётся через JS ResizeObserver) */
+    .board-wrapper {
+      width: 320px;
+      height: 320px;
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: 1.48fr repeat(9, 1fr) 1.48fr;
+      grid-template-rows: 1.48fr repeat(9, 1fr) 1.48fr;
+      gap: 2px;
+      padding: 5px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6e4e1b, #b88c3a, #5c4014);
+      border: 2px solid var(--gold-light);
+      box-shadow: 0 14px 45px rgba(0, 0, 0, 0.88), inset 0 0 12px rgba(0, 0, 0, 0.6);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .tile {
+      position: relative;
+      background: linear-gradient(180deg, #f5ebd6 0%, #e6d4b1 100%);
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      border: 1px solid rgba(110, 78, 27, 0.55);
+      color: var(--ink);
+    }
+
+    .tile:hover {
+      z-index: 25;
+      transform: scale(1.07);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+      border-color: var(--turquoise);
+    }
+
+    .tile-active-glow {
+      box-shadow: inset 0 0 0 2px var(--turquoise), 0 0 12px rgba(42, 123, 118, 0.75) !important;
+      background: linear-gradient(180deg, #fff8ea 0%, #ebd9b5 100%) !important;
+    }
+
+    .tile-mortgaged {
+      opacity: 0.65;
+      background: repeating-linear-gradient(-45deg, #d8c6a3, #d8c6a3 5px, #c4b08b 5px, #c4b08b 10px);
+    }
+
+    /* Цветная полоса региона города */
+    .color-bar {
+      width: 100%;
+      height: 21%;
+      min-height: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 0 2px;
+      border-bottom: 1px solid rgba(35, 25, 17, 0.35);
+    }
+
+    .tile-name {
+      font-size: clamp(5.5px, 0.85vmin, 11px);
+      font-weight: 700;
+      line-height: 1.04;
+      text-align: center;
+      padding: 1px 2px;
+      color: #1f160e;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tile-price {
+      font-size: clamp(5.5px, 0.78vmin, 10px);
+      font-weight: 700;
+      text-align: center;
+      color: var(--ink-muted);
+      padding-bottom: 1px;
+    }
+
+    .corner-tile {
+      background: radial-gradient(circle at center, #f6ecd7, #d8c196);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2px;
+    }
+
+    /* Печать владельца на клетке */
+    .owner-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: clamp(7px, 0.95vmin, 11px);
+      height: clamp(7px, 0.95vmin, 11px);
+      border-radius: 50%;
+      border: 1.5px solid #fff8ea;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      z-index: 4;
+    }
+
+    /* Постройки: Дома и Отель */
+    .building-pip {
+      width: clamp(4px, 0.62vmin, 7px);
+      height: clamp(4px, 0.62vmin, 7px);
+      background: #2a7b76;
+      border: 1px solid #f5ebd6;
+      border-radius: 1px;
+    }
+    .building-citadel {
+      width: clamp(9px, 1.25vmin, 15px);
+      height: clamp(5px, 0.7vmin, 8px);
+      background: #8f2d28;
+      border: 1px solid #f5ebd6;
+      border-radius: 2px;
+    }
+
+    /* Контейнер фишек игроков */
+    .tokens-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      pointer-events: none;
+      z-index: 10;
+      padding: 2px;
+    }
+
+    .player-token {
+      width: clamp(15px, 2.3vmin, 28px);
+      height: clamp(15px, 2.3vmin, 28px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(9px, 1.35vmin, 16px);
+      background: #1b1510;
+      color: #f5ebd6;
+      border: 2px solid var(--p-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+      transition: transform 0.25s ease;
+      overflow: hidden;
+    }
+
+    .player-token img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .player-token.active-turn {
+      transform: scale(1.22);
+      z-index: 15;
+      box-shadow: 0 0 0 2px #fff8ea, 0 4px 10px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Центральная область поля */
+    .board-center {
+      grid-column: 2 / 11;
+      grid-row: 2 / 11;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(242, 230, 207, 0.14), rgba(18, 14, 11, 0.94)),
+        repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 28px, rgba(197, 155, 67, 0.06) 29px, transparent 30px);
+      background-color: #191410;
+      border-radius: 6px;
+      border: 1.5px solid rgba(197, 155, 67, 0.45);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(5px, 1.4vmin, 16px);
+      overflow: hidden;
+    }
+
+    /* Декоративная роза ветров в центре */
+    .compass-watermark {
+      position: absolute;
+      width: 58%;
+      height: 58%;
+      opacity: 0.08;
+      pointer-events: none;
+      color: var(--gold-light);
+    }
+
+    /* Кубики */
+    .dice-box {
+      width: clamp(32px, 5.2vmin, 54px);
+      height: clamp(32px, 5.2vmin, 54px);
+      border-radius: 8px;
+      background: linear-gradient(145deg, #f5ebd6, #d4bc8d);
+      border: 2px solid var(--bronze);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), inset 0 1px 2px #fff;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: clamp(4px, 0.75vmin, 8px);
+      gap: 2px;
+    }
+
+    .dice-rolling {
+      animation: diceShake 0.4s infinite linear;
+      border-color: var(--crimson);
+    }
+
+    @keyframes diceShake {
+      0% { transform: rotate(0deg) scale(1.05); }
+      25% { transform: rotate(14deg) scale(1.1); }
+      50% { transform: rotate(-12deg) scale(1.04); }
+      75% { transform: rotate(10deg) scale(1.1); }
+      100% { transform: rotate(0deg) scale(1.05); }
+    }
+
+    .pip {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #231911;
+      opacity: 0;
+    }
+    .pip.on { opacity: 1; }
+    .pip.red-pip { background: #8f2d28; }
+
+    /* Всплывающее изменение баланса */
+    .money-float {
+      position: fixed;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700;
+      font-size: 1.45rem;
+      pointer-events: none;
+      z-index: 100;
+      animation: floatUpFade 1.5s ease-out forwards;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+    }
+
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translate(-50%, 8px) scale(0.9); }
+      20% { opacity: 1; transform: translate(-50%, -6px) scale(1.08); }
+      100% { opacity: 0; transform: translate(-50%, -52px) scale(1); }
+    }
+
+    /* Кастомный скроллбар */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(18, 15, 12, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(197, 155, 67, 0.45); border-radius: 4px; }
+  </style>
+</head>
+<body class="flex flex-col justify-between">
+
+  <!-- ==================== ЭКРАН НАСТРОЙКИ ИГРЫ (ЛОББИ) ==================== -->
+  <div id="setupScreen" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-[#0e0b09]/92 backdrop-blur-sm">
+    <div class="parchment-card corner-ornament w-full max-w-3xl rounded-xl p-5 sm:p-8 my-auto">
+      <div class="text-center border-b border-[#8a6424]/40 pb-4 mb-5">
+        <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded border border-[#8a6424]/50 bg-[#e2cfa8]/70 text-[#5a4634] text-xs font-semibold uppercase tracking-widest mb-2">
+          <span>Мировая Экономика</span>
+          <span>•</span>
+          <span>2–7 Игроков на одном устройстве</span>
+        </div>
+        <h1 class="font-historic text-2xl sm:text-4xl font-bold text-[#231911] tracking-wide">
+          МОНОПОЛИЯ: ВЕЛИКИЕ ГОРОДА МИРА
+        </h1>
+        <p class="text-[#4a3726] text-xs sm:text-sm mt-1.5 max-w-xl mx-auto">
+          Покупайте столицы мира, проводите аукционы, заключайте сделки, стройте дома и отели и открывайте <span class="font-bold text-[#1d5753]">карточки с интересными фактами</span> о каждом городе.
+        </p>
+      </div>
+
+      <!-- Выбор количества игроков -->
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#4a3726]">Количество участников:</span>
+          <span id="playerCountLabel" class="font-historic text-lg font-bold text-[#1d5753]">4 ИГРОКА</span>
+        </div>
+        <div class="grid grid-cols-6 gap-2" id="countSelector"></div>
+      </div>
+
+      <!-- Список игроков -->
+      <div id="playersSetupList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[42dvh] overflow-y-auto pr-1 mb-6"></div>
+
+      <!-- Кнопки -->
+      <div class="flex flex-col sm:flex-row gap-3 items-center justify-between pt-2 border-t border-[#8a6424]/30">
+        <button onclick="openRulesModal()" class="hist-btn btn-bronze-outline w-full sm:w-auto px-5 py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
+          <span>📜</span> Официальные правила
+        </button>
+        <button onclick="startGame()" class="hist-btn btn-turquoise w-full sm:flex-1 py-3 px-6 rounded-lg font-historic font-bold text-base sm:text-lg tracking-wider flex items-center justify-center gap-2">
+          <span>🧭</span> НАЧАТЬ ИГРУ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ОСНОВНОЙ ИГРОВОЙ ЭКРАН ==================== -->
+  <div id="gameScreen" class="hidden relative z-10">
+
+    <!-- ЛЕВАЯ / ВЕРХНЯЯ ПАНЕЛЬ: ИГРОКИ -->
+    <aside id="leftHudPanel" class="w-full flex flex-col gap-1.5 shrink-0">
+      <div class="obsidian-panel rounded-lg px-2.5 py-1.5 flex items-center justify-between shrink-0 gap-1">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="text-[#c59b43] text-sm">🧭</span>
+          <span class="font-historic text-xs sm:text-sm font-bold text-[#e2be6b] tracking-wider truncate">АТЛАС МИРА</span>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="fullscreenBtn" onclick="toggleFullscreen()" title="На весь экран (Rotate)" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
+            ⛶
+          </button>
+          <button id="soundToggleBtn" onclick="toggleSound()" title="Звук" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
+            🔊
+          </button>
+          <button onclick="openRulesModal()" title="Правила" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
+            📜
+          </button>
+          <button onclick="confirmRestart()" title="Новая игра" class="hist-btn btn-bronze-outline px-2 py-1 rounded text-xs">
+            🔄
+          </button>
+        </div>
+      </div>
+
+      <div id="playersHudList" class="flex gap-1.5 overflow-x-auto pb-0.5 flex-1"></div>
+    </aside>
+
+    <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ: ИГРОВОЕ ПОЛЕ -->
+    <main id="boardContainer" class="flex-1 flex items-center justify-center min-w-0 min-h-0 overflow-hidden">
+      <div id="boardGrid" class="board-wrapper">
+        <!-- 40 клеток генерируются JS -->
+
+        <!-- ЦЕНТР ПОЛЯ -->
+        <div class="board-center">
+          <!-- Водяной знак компаса -->
+          <svg class="compass-watermark" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+            <circle cx="50" cy="50" r="46" stroke-width="1"/>
+            <circle cx="50" cy="50" r="38" stroke-width="0.6" stroke-dasharray="3 3"/>
+            <polygon points="50,4 56,44 96,50 56,56 50,96 44,56 4,50 44,44" stroke-width="1"/>
+          </svg>
+
+          <!-- Баннер текущего хода -->
+          <div class="w-full flex flex-col items-center text-center z-10">
+            <div class="text-[8px] sm:text-[10px] uppercase tracking-widest text-[#c59b43] font-semibold">СЕЙЧАС ХОДИТ</div>
+            <div id="turnBanner" class="mt-0.5 px-3 py-0.5 sm:py-1 rounded-full bg-[#241c15] border border-[#c59b43] flex items-center gap-1.5 sm:gap-2 shadow">
+              <span id="turnAvatar" class="text-sm flex items-center justify-center">👑</span>
+              <span id="turnName" class="font-historic text-xs sm:text-base font-bold text-[#f2e6cf] truncate max-w-[115px] sm:max-w-[180px]">Игрок 1</span>
+              <span id="turnMoney" class="text-[10px] sm:text-xs font-bold text-[#e2be6b]">1500 $</span>
+            </div>
+          </div>
+
+          <!-- Кубики и статус -->
+          <div class="flex flex-col items-center justify-center gap-1 sm:gap-2.5 my-auto z-10">
+            <div class="flex items-center gap-2.5 sm:gap-4">
+              <div id="dice1" class="dice-box"></div>
+              <div id="dice2" class="dice-box"></div>
+            </div>
+            <div id="statusMessage" class="text-[9px] sm:text-xs text-center text-[#f2e6cf] bg-[#120e0b]/85 px-2.5 py-1 rounded border border-[#8a6424]/50 max-w-[94%] line-clamp-2">
+              Бросьте кубики, чтобы сделать ход
+            </div>
+          </div>
+
+          <!-- Кнопки действия -->
+          <div class="w-full flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 z-10">
+            <button id="rollBtn" onclick="handleRollDice()" class="hist-btn btn-gold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-historic font-bold text-[10px] sm:text-xs flex items-center gap-1">
+              <span>🎲</span> БРОСИТЬ КУБИКИ
+            </button>
+            <button id="payBailBtn" onclick="handlePayBail()" class="hidden hist-btn btn-bronze-outline px-2.5 py-1.5 rounded-lg text-[#e2be6b] font-bold text-[9px] sm:text-xs">
+              🔓 Выкуп 50 $
+            </button>
+            <button id="useJailCardBtn" onclick="handleUseJailCard()" class="hidden hist-btn btn-turquoise px-2.5 py-1.5 rounded-lg font-bold text-[9px] sm:text-xs">
+              📜 Карта свободы
+            </button>
+            <button id="managePropsBtn" onclick="openPortfolioModal()" class="hist-btn btn-bronze-outline px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[9px] sm:text-xs flex items-center gap-1">
+              <span>🏛️</span> Активы
+            </button>
+            <button id="tradeBtn" onclick="openTradeModal()" class="hist-btn btn-bronze-outline px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[9px] sm:text-xs flex items-center gap-1">
+              <span>🤝</span> Сделка
+            </button>
+            <button id="rescueBtn" onclick="openRescueModal()" class="hidden hist-btn btn-crimson px-3 py-1.5 sm:py-2 rounded-lg font-bold text-[10px] sm:text-xs animate-pulse">
+              ⚠️ Погасить долг!
+            </button>
+            <button id="endTurnBtn" onclick="endTurn()" class="hidden hist-btn btn-turquoise px-3.5 py-1.5 sm:py-2 rounded-lg font-historic font-bold text-[10px] sm:text-xs">
+              ЗАВЕРШИТЬ ХОД ➔
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ПРАВАЯ / НИЖНЯЯ ПАНЕЛЬ: ЖУРНАЛ ХОДОВ -->
+    <aside id="rightLogPanel" class="w-full obsidian-panel rounded-lg p-2 flex flex-col shrink-0 max-h-20">
+      <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-1 mb-1">
+        <span class="font-historic text-[10px] sm:text-xs font-bold text-[#e2be6b] flex items-center gap-1">
+          <span>✒️</span> ХРОНИКА ИГРЫ
+        </span>
+        <span class="text-[9px] text-[#a8947a]">Нажмите на любой город</span>
+      </div>
+      <div id="gameLog" class="flex-1 overflow-y-auto space-y-1 text-[10px] sm:text-xs text-[#dfd0b8] pr-1">
+        <div class="text-[#e2be6b]">Нажмите на любую клетку поля, чтобы открыть карточку города с интересными фактами.</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: КАРТОЧКА ГОРОДА (ИНТЕРЕСНЫЕ ФАКТЫ + ПОКУПКА / АУКЦИОН) ==================== -->
+  <div id="cityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-lg rounded-xl overflow-hidden shadow-2xl">
+      
+      <!-- Фото города из Images/ -->
+      <div id="modalBannerContainer" class="relative w-full h-40 sm:h-48 bg-[#261d15] border-b-2 border-[#8a6424] overflow-hidden flex items-end">
+        <img id="modalCityImage" src="" alt="" class="hidden absolute inset-0 w-full h-full object-cover" />
+        <div id="modalBannerGradient" class="absolute inset-0 bg-gradient-to-t from-[#17110c] via-[#17110c]/40 to-transparent"></div>
+
+        <button onclick="closeCityModal()" class="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-[#17110c]/80 hover:bg-[#17110c] text-[#f2e6cf] flex items-center justify-center border border-[#c59b43] text-sm">✕</button>
+
+        <div class="relative z-10 p-4 w-full">
+          <div class="flex items-center gap-2 mb-1">
+            <span id="modalRegionBadge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#17110c]/80 text-[#e2be6b] border border-[#c59b43]/60">РЕГИОН</span>
+            <span id="modalCapitalBadge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#2a7b76] text-[#f5ebd6] border border-[#74c9c3]/50">★ СТОЛИЦА</span>
+          </div>
+          <h2 id="modalCityName" class="font-historic text-2xl sm:text-3xl font-bold text-[#f7eedc] leading-none">ПАРИЖ</h2>
+          <p id="modalCountryInfo" class="text-xs sm:text-sm text-[#e0cfa8] mt-0.5">Франция • Население: 11.2 млн</p>
+        </div>
+      </div>
+
+      <!-- Содержимое карточки -->
+      <div class="p-4 sm:p-5 space-y-3 max-h-[64dvh] overflow-y-auto">
+        <!-- Блок «Интересные факты» -->
+        <div class="rounded-lg bg-[#ead7b2] border border-[#8a6424]/50 p-3.5 shadow-inner">
+          <div class="flex items-center gap-1.5 text-[#1d5753] font-historic text-sm font-bold uppercase tracking-wider mb-1">
+            <span>📜 Интересные факты и достопримечательности</span>
+          </div>
+          <div class="text-xs text-[#754d17] font-bold mb-1.5" id="modalLandmark">
+            🏛️ Главные символы: Лувр и Эйфелева башня
+          </div>
+          <p id="modalFactText" class="text-xs sm:text-sm text-[#231911] leading-relaxed">
+            Описание города...
+          </p>
+        </div>
+
+        <!-- Экономика собственности -->
+        <div id="modalEconomyBlock" class="rounded-lg bg-[#e6d1a7]/70 border border-[#8a6424]/40 p-3 text-xs space-y-1.5 text-[#231911]">
+          <div class="flex justify-between items-center">
+            <span class="text-[#5a4634]">Стоимость покупки:</span>
+            <span id="modalPrice" class="font-historic font-bold text-base text-[#1f160e]">300 $</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-[#5a4634]">Рента (базовая / монополия):</span>
+            <span id="modalRent" class="font-bold text-[#1d5753]">28 / 56 $</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-[#5a4634]">Постройка Дома / Отеля:</span>
+            <span id="modalBuildCost" class="font-semibold text-[#6b4816]">200 $</span>
+          </div>
+          <div class="flex justify-between items-center pt-1.5 border-t border-[#8a6424]/30">
+            <span class="text-[#5a4634]">Владелец:</span>
+            <span id="modalOwner" class="font-bold text-[#1d5753]">Свободно</span>
+          </div>
+        </div>
+
+        <div id="modalActionNotice" class="hidden rounded-lg p-3 text-xs sm:text-sm font-semibold text-center border"></div>
+
+        <div id="modalButtons" class="flex flex-wrap gap-2 pt-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: АУКЦИОН БАНКИРА (СТАРТ 10 $) ==================== -->
+  <div id="auctionModal" class="hidden fixed inset-0 z-[55] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-md rounded-xl p-5 shadow-2xl space-y-3">
+      <div class="text-center border-b border-[#8a6424]/40 pb-2.5">
+        <div class="text-[11px] uppercase tracking-widest text-[#1d5753] font-bold">Аукцион Банкира • Старт с 10 $</div>
+        <h3 id="auctionTileName" class="font-historic text-2xl font-bold text-[#231911] mt-0.5">ЛОНДОН</h3>
+        <p id="auctionTileMeta" class="text-xs text-[#5a4634]">Номинал: 300 $</p>
+      </div>
+
+      <div class="rounded-lg bg-[#ead7b2] border border-[#8a6424]/50 p-3 text-center">
+        <div class="text-[11px] uppercase font-bold text-[#5a4634]">Текущая ставка</div>
+        <div id="auctionCurrentBid" class="font-historic text-3xl font-bold text-[#1d5753]">10 $</div>
+        <div id="auctionLeaderName" class="text-xs font-semibold text-[#231911] mt-0.5">Ставок пока нет</div>
+      </div>
+
+      <div id="auctionBidderTurn" class="text-center text-sm font-bold text-[#231911]"></div>
+
+      <div class="grid grid-cols-4 gap-1.5">
+        <button onclick="placeAuctionBid(1)" class="hist-btn btn-turquoise py-2 rounded-lg text-xs font-bold">+1 $</button>
+        <button onclick="placeAuctionBid(10)" class="hist-btn btn-turquoise py-2 rounded-lg text-xs font-bold">+10 $</button>
+        <button onclick="placeAuctionBid(50)" class="hist-btn btn-turquoise py-2 rounded-lg text-xs font-bold">+50 $</button>
+        <button onclick="placeAuctionBid(100)" class="hist-btn btn-turquoise py-2 rounded-lg text-xs font-bold">+100 $</button>
+      </div>
+
+      <button onclick="passAuctionTurn()" class="hist-btn btn-gold w-full py-2.5 rounded-lg font-historic font-bold text-xs uppercase">
+        Пас (выйти из торгов)
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: СДЕЛКИ И ОБМЕН МЕЖДУ ИГРОКАМИ ==================== -->
+  <div id="tradeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-2xl rounded-xl p-4 sm:p-6 flex flex-col max-h-[90dvh]">
+      <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-3 mb-3">
+        <div>
+          <h3 class="font-historic text-lg sm:text-2xl font-bold text-[#231911]">🤝 СДЕЛКИ И ОБМЕН СОБСТВЕННОСТЬЮ</h3>
+          <p class="text-xs text-[#5a4634]">Обменивайтесь улицами (без зданий), деньгами и картами «Выйти из тюрьмы бесплатно»</p>
+        </div>
+        <button onclick="closeTradeModal()" class="w-8 h-8 rounded-full bg-[#231911] text-[#f2e6cf] border border-[#8a6424]">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-[#231911]">Партнёр по сделке:</label>
+          <select id="tradePartnerSelect" onchange="renderTradeLists()" class="bg-[#e6d1a7] border border-[#8a6424] rounded px-3 py-1.5 text-xs font-bold text-[#231911]"></select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Предложение инициатора -->
+          <div class="p-3 rounded-lg bg-[#e6d1a7]/80 border border-[#8a6424]/50 space-y-2">
+            <div id="tradeMyTitle" class="font-historic font-bold text-sm text-[#1d5753]">Ваше предложение</div>
+            <div class="flex items-center gap-2 text-xs">
+              <span>Деньги ($):</span>
+              <input id="tradeMyCash" type="number" min="0" value="0" class="w-24 bg-[#f7efe0] border border-[#8a6424] rounded px-2 py-1 font-bold text-[#231911]">
+            </div>
+            <label id="tradeMyJailLabel" class="hidden flex items-center gap-1.5 text-xs font-semibold text-[#231911]">
+              <input id="tradeMyJailCheck" type="checkbox"> Передать карту «Выйти из тюрьмы»
+            </label>
+            <div id="tradeMyPropsList" class="space-y-1 max-h-40 overflow-y-auto text-xs"></div>
+          </div>
+
+          <!-- Запрос у партнёра -->
+          <div class="p-3 rounded-lg bg-[#e6d1a7]/80 border border-[#8a6424]/50 space-y-2">
+            <div id="tradePartnerTitle" class="font-historic font-bold text-sm text-[#754d17]">Вы запрашиваете</div>
+            <div class="flex items-center gap-2 text-xs">
+              <span>Деньги ($):</span>
+              <input id="tradePartnerCash" type="number" min="0" value="0" class="w-24 bg-[#f7efe0] border border-[#8a6424] rounded px-2 py-1 font-bold text-[#231911]">
+            </div>
+            <label id="tradePartnerJailLabel" class="hidden flex items-center gap-1.5 text-xs font-semibold text-[#231911]">
+              <input id="tradePartnerJailCheck" type="checkbox"> Запросить карту «Выйти из тюрьмы»
+            </label>
+            <div id="tradePartnerPropsList" class="space-y-1 max-h-40 overflow-y-auto text-xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-3 mt-3 border-t border-[#8a6424]/30">
+        <button onclick="executeTrade()" class="hist-btn btn-turquoise flex-1 py-2.5 rounded-lg font-historic font-bold text-sm">
+          ПОДТВЕРДИТЬ СДЕЛКУ ОБОИМИ ИГРОКАМИ
+        </button>
+        <button onclick="closeTradeModal()" class="hist-btn btn-gold px-4 py-2.5 rounded-lg font-bold text-xs">
+          Отмена
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: АНТИКРИЗИСНЫЙ РЕЖИМ («Я НЕ МОГУ ЗАПЛАТИТЬ!») ==================== -->
+  <div id="rescueModal" class="hidden fixed inset-0 z-[58] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-md rounded-xl p-5 shadow-2xl space-y-3 text-center">
+      <div class="text-4xl">⚠️</div>
+      <h3 class="font-historic text-xl sm:text-2xl font-bold text-[#8f2d28]">НА ПОМОЩЬ! НЕ ХВАТАЕТ ДЕНЕГ!</h3>
+      <p id="rescueInfoText" class="text-xs sm:text-sm text-[#231911] leading-relaxed"></p>
+      <div class="space-y-2 pt-1">
+        <button onclick="openPortfolioModalFromRescue()" class="hist-btn btn-turquoise w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
+          🏛️ Продать Дома/Отели или заложить улицы
+        </button>
+        <button onclick="openTradeModalFromRescue()" class="hist-btn btn-gold w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
+          🤝 Продать улицу другому игроку (Сделка)
+        </button>
+        <button id="settleDebtBtn" onclick="confirmSettleDebt()" class="hidden hist-btn btn-turquoise w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
+          ✅ Оплатить долг и продолжить игру!
+        </button>
+        <button onclick="declareBankruptcyFromRescue()" class="hist-btn btn-crimson w-full py-2.5 rounded-lg font-bold text-xs sm:text-sm">
+          🏳️ Объявить себя банкротом и выйти из игры
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: КАРТОЧКА ШАНС / МИРОВОЙ ФОНД ==================== -->
+  <div id="eventCardModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-md rounded-xl p-6 text-center shadow-2xl">
+      <div id="eventCardIcon" class="text-4xl sm:text-5xl mb-2">📜</div>
+      <div id="eventCardDeck" class="font-historic text-xs uppercase tracking-widest text-[#1d5753] font-bold mb-1">ШАНС</div>
+      <h3 id="eventCardTitle" class="font-historic text-xl sm:text-2xl font-bold text-[#231911] mb-2">ВЫГОДНЫЙ КОНТРАКТ</h3>
+      <p id="eventCardDesc" class="text-sm text-[#38291c] mb-5 leading-relaxed">Описание события...</p>
+      <button onclick="closeEventCardModal()" class="hist-btn btn-gold w-full py-3 rounded-lg font-historic font-bold text-sm">
+        ПРИНЯТЬ
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: УПРАВЛЕНИЕ АКТИВАМИ (ДОМА И ОТЕЛИ) ==================== -->
+  <div id="portfolioModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-2xl rounded-xl p-4 sm:p-6 flex flex-col max-h-[88dvh]">
+      <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-3 mb-3">
+        <div>
+          <h3 class="font-historic text-lg sm:text-2xl font-bold text-[#231911]">🏛️ УПРАВЛЕНИЕ СОБСТВЕННОСТЬЮ</h3>
+          <p class="text-xs text-[#5a4634]">Стройте Дома равномерно по всей цветовой группе (до 4 Домов, затем Отель)</p>
+          <p id="bankSupplyBadge" class="text-xs font-bold text-[#1d5753] mt-0.5">В Банке осталось: 32 Дома • 12 Отелей</p>
+        </div>
+        <button onclick="closePortfolioModal()" class="w-8 h-8 rounded-full bg-[#231911] text-[#f2e6cf] border border-[#8a6424]">✕</button>
+      </div>
+      <div id="portfolioList" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛЬНОЕ ОКНО: ОФИЦИАЛЬНЫЕ ПРАВИЛА ==================== -->
+  <div id="rulesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-xl rounded-xl p-5 sm:p-6 max-h-[86dvh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#8a6424]/40 pb-3 mb-4">
+        <h3 class="font-historic text-xl font-bold text-[#231911]">📜 ОФИЦИАЛЬНЫЕ ПРАВИЛА ИГРЫ</h3>
+        <button onclick="closeRulesModal()" class="w-8 h-8 rounded-full bg-[#231911] text-[#f2e6cf] border border-[#8a6424]">✕</button>
+      </div>
+      <div class="space-y-3 text-xs sm:text-sm text-[#231911] leading-relaxed">
+        <p><strong class="text-[#1d5753]">1. Старт и движение:</strong> Каждый игрок начинает на клетке <strong>«СТАРТ»</strong> с капиталом <strong>1500 $</strong>. За каждый проход или остановку на «СТАРТЕ» Банк выплачивает <strong>+200 $</strong>.</p>
+        <p><strong class="text-[#754d17]">2. Покупка и Аукцион с 10 $:</strong> Остановившись на свободной улице, вокзале или коммунальном предприятии, вы можете купить их по номиналу. Если вы отказываетесь, Банкир проводит <strong>аукцион со стартовой ценой 10 $</strong> среди всех игроков.</p>
+        <p><strong class="text-[#1d5753]">3. Равномерная застройка (32 Дома и 12 Отелей):</strong> Собрав все улицы одного цвета, вы получаете двойную ренту и можете строить <strong>Дома</strong> равномерно (нельзя поставить 2-й дом, пока на каждой улице группы нет хотя бы по 1 дому). После 4 Домов строится <strong>Отель</strong>.</p>
+        <p><strong class="text-[#754d17]">4. Сделки, залог и банкротство:</strong> В любой момент можно обмениваться улицами (без зданий), деньгами и картами выхода из тюрьмы. Заложить улицу можно за 50% цены (выкуп +10%). При нехватке денег сначала продайте здания за полцены или заложите улицы.</p>
+        <p><strong class="text-[#8f2d28]">5. Тюрьма:</strong> Три дубля подряд отправляют в Тюрьму. Выйти можно за 50 $, по карте «Выйти из тюрьмы бесплатно» или выбросив дубль (до 3 попыток).</p>
+      </div>
+      <button onclick="closeRulesModal()" class="hist-btn btn-turquoise w-full mt-5 py-3 rounded-lg font-historic font-bold text-sm">
+        ПОНЯТНО
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== ЭКРАН ПОБЕДЫ ==================== -->
+  <div id="victoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/88 backdrop-blur-xs">
+    <div class="parchment-card corner-ornament w-full max-w-md rounded-xl p-6 sm:p-8 text-center shadow-2xl">
+      <div class="text-5xl mb-2">👑</div>
+      <div class="font-historic text-xs uppercase tracking-widest text-[#1d5753] font-bold mb-1">ПОБЕДИТЕЛЬ МОНОПОЛИИ</div>
+      <h2 id="winnerName" class="font-historic text-2xl sm:text-3xl font-bold text-[#231911] mb-2">ИГРОК 1</h2>
+      <p id="winnerStats" class="text-sm text-[#4a3726] mb-6">Итоговый капитал: 4500 $</p>
+      <button onclick="location.reload()" class="hist-btn btn-gold w-full py-3.5 rounded-lg font-historic font-bold text-sm">
+        НОВАЯ ИГРА
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       0. КОНФИГУРАЦИЯ ЛОКАЛЬНЫХ ФОТО И ИКОНОК ИЗ ПАПКИ Images/
+       ========================================================================== */
+    const ASSET_CONFIG = {
+      folder: 'Images',
+      cityImages: {
+        0: 'Start.jpeg',
+        1: 'kair.jpeg',
+        2: 'Мировой фонд.jpeg',
+        3: 'Стамбул.jpeg',
+        4: 'Налог.jpeg',
+        6: 'BAngkok.jpg',
+        7: 'Шанс.jpeg',
+        8: 'Мумбаи.jpeg',
+        9: 'Сеул.jpeg',
+        10: 'Тюрьма.png',
+        11: 'Сингапур.jpeg',
+        12: 'Энергосеть.png',
+        13: 'Дубай.jpeg',
+        14: 'Найроби.jpeg',
+        16: 'Сидней.jpeg',
+        17: 'Мировой фонд.jpeg',
+        18: 'Рио-де-Жанейро.jpeg',
+        19: 'Буэнос-Айрес.jpeg',
+        21: 'Торонто.jpeg',
+        22: 'Шанс.jpeg',
+        23: 'Нью-Йорк.jpeg',
+        24: 'Рим.jpeg',
+        26: 'Мадрид.jpeg',
+        27: 'Берлин.jpeg',
+        28: 'Энергосеть.png',
+        29: 'Мехико.jpeg',
+        30: 'Тюрьма.png',
+        31: 'Лондон.jpeg',
+        32: 'Париж.jpeg',
+        33: 'Мировой фонд.jpeg',
+        34: 'Цюрих.jpeg',
+        36: 'Шанс.jpeg',
+        37: 'Сан-Франциско.jpeg',
+        38: 'Налог.jpeg',
+        39: 'Токио.jpeg'
+      },
+      playerIcons: [
+        'Crown.jpeg',
+        'ракета : Истребитель.png',
+        'волк : Робот-лис.jpeg',
+        'Кристалл : Алмаз.jpeg',
+        'Молния : Реактор.jpeg',
+        'Щит : Кибер-череп.jpeg',
+        'Дрон : Звезда.jpeg'
+      ],
+      specialTileIcons: {
+        0: 'Start.jpeg',
+        2: 'Мировой фонд.jpeg',
+        4: 'Налог.jpeg',
+        7: 'Шанс.jpeg',
+        10: 'Тюрьма.png',
+        12: 'Энергосеть.png',
+        17: 'Мировой фонд.jpeg',
+        22: 'Шанс.jpeg',
+        28: 'Энергосеть.png',
+        30: 'Тюрьма.png',
+        33: 'Мировой фонд.jpeg',
+        36: 'Шанс.jpeg',
+        38: 'Налог.jpeg'
+      }
+    };
+
+    function getAssetUrl(filename) {
+      if (!filename) return '';
+      return `${ASSET_CONFIG.folder}/${encodeURIComponent(filename)}`;
+    }
+
+    /* ==========================================================================
+       1. ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API)
+       ========================================================================== */
+    class HistoricSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      tone(freq, type = 'sine', duration = 0.14, gainVal = 0.12, delay = 0) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+
+      click() { this.tone(420, 'triangle', 0.06, 0.08); }
+
+      diceRoll() {
+        for (let i = 0; i < 6; i++) {
+          this.tone(160 + Math.random() * 140, 'triangle', 0.05, 0.1, i * 0.07);
+        }
+      }
+
+      step() { this.tone(240, 'sine', 0.06, 0.09); }
+
+      coinGain() {
+        this.tone(587.33, 'sine', 0.14, 0.12, 0);
+        this.tone(880.00, 'sine', 0.22, 0.14, 0.09);
+      }
+
+      coinLoss() {
+        this.tone(311.13, 'triangle', 0.18, 0.12, 0);
+        this.tone(220.00, 'triangle', 0.26, 0.12, 0.12);
+      }
+
+      scrollOpen() {
+        this.tone(392.00, 'sine', 0.18, 0.09, 0);
+        this.tone(493.88, 'sine', 0.22, 0.09, 0.08);
+        this.tone(587.33, 'sine', 0.28, 0.10, 0.16);
+      }
+
+      jail() {
+        this.tone(146.83, 'sawtooth', 0.25, 0.09, 0);
+        this.tone(110.00, 'sawtooth', 0.35, 0.09, 0.2);
+      }
+
+      victory() {
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((f, idx) => this.tone(f, 'triangle', 0.32, 0.14, idx * 0.12));
+      }
+    }
+
+    const sfx = new HistoricSoundEngine();
+
+    /* ==========================================================================
+       2. ДАННЫЕ ПОЛЯ: 40 КЛЕТОК (ГОРОДА МИРА + ИНТЕРЕСНЫЕ ФАКТЫ)
+       ========================================================================== */
+    const GROUP_COLORS = {
+      brown: '#7a4b2a',
+      lightblue: '#3a7d8c',
+      pink: '#9e476b',
+      orange: '#c46b27',
+      red: '#a3322c',
+      yellow: '#c4962c',
+      green: '#2d734b',
+      darkblue: '#244b7a'
+    };
+
+    const BOARD_TILES = [
+      {
+        id: 0, type: 'start', name: 'СТАРТ (ВПЕРЁД)', icon: '🏁',
+        region: 'ОТПРАВНАЯ ТОЧКА', isCapital: false,
+        country: 'Международный нулевой километр', pop: 'Кругосветный маршрут',
+        landmark: 'Главный меридиан и ворота мира',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #8a6424)',
+        fact: 'Отсюда начинается кругосветное путешествие по величайшим городам планеты. Каждый раз, когда ваша фишка проходит мимо поля «СТАРТ» или останавливается на нём, Банк выплачивает вам +200 $.'
+      },
+      {
+        id: 1, type: 'city', group: 'brown', color: GROUP_COLORS.brown, name: 'КАИР',
+        price: 60, rent: [4, 20, 60, 180, 320, 450], buildCost: 50,
+        region: 'СЕВЕРНАЯ АФРИКА', isCapital: true,
+        country: 'Египет', pop: '21.3 млн (агломерация)',
+        landmark: 'Великие пирамиды Гизы, Сфинкс и мечеть Аль-Азхар',
+        bannerGrad: 'linear-gradient(135deg, #7a4b2a, #c59b43)',
+        fact: 'Каир называют «Городом тысячи минаретов» и «Матерью мира». В 970 году здесь был основан университет Аль-Азхар — один из старейших непрерывно действующих университетов планеты, а рядом возвышается единственное сохранившееся Чудо света — пирамида Хеопса.'
+      },
+      {
+        id: 2, type: 'chest', name: 'МИРОВОЙ ФОНД', icon: '🏦',
+        region: 'ОБЩЕСТВЕННАЯ КАЗНА', isCapital: false,
+        country: 'Международный резерв', pop: 'Глобальный фонд',
+        landmark: 'Всемирный банк и хранилище резервов',
+        bannerGrad: 'linear-gradient(135deg, #8a6424, #3d2c12)',
+        fact: 'Международные финансовые фонды объединяют капиталы разных стран для развития инфраструктуры, торговли и поддержки глобальной экономики.'
+      },
+      {
+        id: 3, type: 'city', group: 'brown', color: GROUP_COLORS.brown, name: 'СТАМБУЛ',
+        price: 60, rent: [6, 30, 90, 270, 400, 550], buildCost: 50,
+        region: 'ЕВРОПА И АЗИЯ', isCapital: false,
+        country: 'Турция (историч. столица трёх империй)', pop: '15.8 млн',
+        landmark: 'Собор Святой Софии, Топкапы и пролив Босфор',
+        bannerGrad: 'linear-gradient(135deg, #7a4b2a, #8f2d28)',
+        fact: 'Бывший Византий и Константинополь — единственный мегаполис в мире, раскинувшийся сразу в двух частях света: Европе и Азии. На протяжении более полутора тысяч лет он служил столицей Римской, Византийской и Османской империй, контролируя пролив Босфор.'
+      },
+      {
+        id: 4, type: 'tax', name: 'ПОДОХОДНЫЙ НАЛОГ', amount: 200, icon: '⚖️',
+        region: 'НАЛОГОВАЯ СЛУЖБА', isCapital: false,
+        country: 'Государственный бюджет', pop: 'Сбор 200 $',
+        landmark: 'Казначейство и налоговая палата',
+        bannerGrad: 'linear-gradient(135deg, #8f2d28, #2b1815)',
+        fact: 'Подоходный налог в современном виде впервые ввёл премьер-министр Великобритании Уильям Питт-младший в 1799 году для пополнения государственной казны.'
+      },
+      {
+        id: 5, type: 'railroad', name: 'ВОСТОЧНЫЙ ЭКСПРЕСС', price: 200, icon: '🚂',
+        region: 'ЖЕЛЕЗНОДОРОЖНАЯ МАГИСТРАЛЬ', isCapital: false,
+        country: 'Париж — Стамбул', pop: 'Легендарный маршрут с 1883 г.',
+        landmark: 'Вокзал Сиркеджи и трансевропейские пути',
+        bannerGrad: 'linear-gradient(135deg, #8a6424, #2a7b76)',
+        fact: 'Знаменитый пассажирский поезд класса «люкс», курсировавший между Парижем и Стамбулом с 1883 года. Рента зависит от количества станций у владельца: 25 / 50 / 100 / 200 $.'
+      },
+      {
+        id: 6, type: 'city', group: 'lightblue', color: GROUP_COLORS.lightblue, name: 'БАНГКОК',
+        price: 100, rent: [8, 40, 100, 300, 450, 600], buildCost: 50,
+        region: 'ЮГО-ВОСТОЧНАЯ АЗИЯ', isCapital: true,
+        country: 'Таиланд', pop: '10.9 млн',
+        landmark: 'Большой дворец и Храм Изумрудного Будды',
+        bannerGrad: 'linear-gradient(135deg, #3a7d8c, #c59b43)',
+        fact: 'Полное церемониальное название Бангкока состоит из 168 букв и занесено в Книгу рекордов Гиннесса как самое длинное название города в мире. Благодаря густой сети каналов в XIX веке его называли «Восточной Венецией».'
+      },
+      {
+        id: 7, type: 'chance', name: 'ШАНС', icon: '❓',
+        region: 'СЛУЧАЙНОЕ СОБЫТИЕ', isCapital: false,
+        country: 'Биржа возможностей', pop: 'Непредсказуемый исход',
+        landmark: 'Мировая торговая биржа',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #183b38)',
+        fact: 'На мировых рынках и в путешествиях удача способна в один миг принести крупную прибыль или отправить вас в другой конец планеты.'
+      },
+      {
+        id: 8, type: 'city', group: 'lightblue', color: GROUP_COLORS.lightblue, name: 'МУМБАИ',
+        price: 100, rent: [8, 40, 100, 300, 450, 600], buildCost: 50,
+        region: 'ЮЖНАЯ АЗИЯ', isCapital: false,
+        country: 'Индия (финансовая столица)', pop: '21.0 млн',
+        landmark: 'Ворота Индии и пещерные храмы Элефанты',
+        bannerGrad: 'linear-gradient(135deg, #3a7d8c, #8a6424)',
+        fact: 'Изначально Мумбаи (Бомбей) представлял собой архипелаг из семи отдельных островов в Аравийском море. В результате масштабных инженерных работ XVIII–XIX веков проливы осушили, соединив острова в крупнейший финансовый и киноцентр Индии (Болливуд).'
+      },
+      {
+        id: 9, type: 'city', group: 'lightblue', color: GROUP_COLORS.lightblue, name: 'СЕУЛ',
+        price: 120, rent: [10, 50, 150, 450, 625, 750], buildCost: 50,
+        region: 'ВОСТОЧНАЯ АЗИЯ', isCapital: true,
+        country: 'Республика Корея', pop: '9.9 млн',
+        landmark: 'Дворец Кёнбоккун и башня Намсан',
+        bannerGrad: 'linear-gradient(135deg, #3a7d8c, #244b7a)',
+        fact: 'Сеул является столицей Кореи более 600 лет — со времён основания династии Чосон в 1394 году. Город был возведён в окружении четырёх гор, а сегодня является одним из самых технологичных мегаполисов мира.'
+      },
+      {
+        id: 10, type: 'jail', name: 'ТЮРЬМА / НА ЭКСКУРСИИ', icon: '⛓️',
+        region: 'ИЗОЛЯТОР', isCapital: false,
+        country: 'Городской суд', pop: 'Охраняемая зона',
+        landmark: 'Центральный изолятор',
+        bannerGrad: 'linear-gradient(135deg, #4a4036, #1b1612)',
+        fact: 'Если вы попали сюда обычным ходом, вы просто «На экскурсии» и не теряете ход. Но за три дубля подряд или по карточке вы отправляетесь в Тюрьму, откуда можно выйти за 50 $, по карточке свободы или выбросив дубль.'
+      },
+      {
+        id: 11, type: 'city', group: 'pink', color: GROUP_COLORS.pink, name: 'СИНГАПУР',
+        price: 140, rent: [12, 60, 180, 500, 700, 900], buildCost: 100,
+        region: 'МАЛАККСКИЙ ПРОЛИВ', isCapital: true,
+        country: 'Сингапур (город-государство)', pop: '5.9 млн',
+        landmark: 'Бухта Марина-Бэй и сады у залива',
+        bannerGrad: 'linear-gradient(135deg, #9e476b, #2a7b76)',
+        fact: 'Название города переводится с санскрита как «Город Льва» (Сингапура). Расположенный на южной оконечности Малайского полуострова, он контролирует Малаккский пролив — ключевой морской путь между Индийским и Тихим океанами.'
+      },
+      {
+        id: 12, type: 'utility', name: 'ЭЛЕКТРОСТАНЦИЯ', price: 150, icon: '⚡',
+        region: 'КОММУНАЛЬНОЕ ПРЕДПРИЯТИЕ', isCapital: false,
+        country: 'Энергосеть мира', pop: 'Генерация энергии',
+        landmark: 'Главная электростанция',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #3a7d8c)',
+        fact: 'Первая в мире центральная электростанция общего пользования (Pearl Street Station) была запущена Томасом Эдисоном в Нью-Йорке в 1882 году. Рента: 4 × кости (если 1 станция) или 10 × кости (если обе).'
+      },
+      {
+        id: 13, type: 'city', group: 'pink', color: GROUP_COLORS.pink, name: 'ДУБАЙ',
+        price: 140, rent: [12, 60, 180, 500, 700, 900], buildCost: 100,
+        region: 'ПЕРСИДСКИЙ ЗАЛИВ', isCapital: false,
+        country: 'ОАЭ (столица эмирата Дубай)', pop: '3.6 млн',
+        landmark: 'Бурдж-Халифа (828 м) и бухта Дубай-Крик',
+        bannerGrad: 'linear-gradient(135deg, #9e476b, #c59b43)',
+        fact: 'Ещё сто лет назад Дубай был небольшим поселением ловцов жемчуга в устье бухты Дубай-Крик. Сегодня здесь возвышается самое высокое здание в истории человечества — небоскрёб Бурдж-Халифа высотой 828 метров.'
+      },
+      {
+        id: 14, type: 'city', group: 'pink', color: GROUP_COLORS.pink, name: 'НАЙРОБИ',
+        price: 160, rent: [14, 70, 200, 550, 750, 950], buildCost: 100,
+        region: 'ВОСТОЧНАЯ АФРИКА', isCapital: true,
+        country: 'Кения', pop: '5.1 млн',
+        landmark: 'Национальный парк Найроби и Великая рифтовая долина',
+        bannerGrad: 'linear-gradient(135deg, #9e476b, #7a4b2a)',
+        fact: 'Название Найроби происходит от выражения народа масаи «Энкаре Найроби» — «место прохладных вод». Это единственная столица в мире, в непосредственной черте которой находится настоящий заповедник дикой саванны со львами, жирафами и носорогами.'
+      },
+      {
+        id: 15, type: 'railroad', name: 'ТРАНССИБ', price: 200, icon: '🚆',
+        region: 'ЖЕЛЕЗНОДОРОЖНАЯ МАГИСТРАЛЬ', isCapital: false,
+        country: 'Евразийский маршрут', pop: 'Протяжённость 9 288 км',
+        landmark: 'Самая длинная железная дорога мира',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #8a6424)',
+        fact: 'Транссибирская магистраль — самая длинная железная дорога на планете (9 288 км), соединяющая Европу с берегами Тихого океана. Рента: 25 / 50 / 100 / 200 $ в зависимости от числа станций.'
+      },
+      {
+        id: 16, type: 'city', group: 'orange', color: GROUP_COLORS.orange, name: 'СИДНЕЙ',
+        price: 180, rent: [16, 80, 220, 600, 800, 1000], buildCost: 100,
+        region: 'ОКЕАНИЯ', isCapital: false,
+        country: 'Австралия (крупнейший город страны)', pop: '5.3 млн',
+        landmark: 'Сиднейский оперный театр и мост Харбор-Бридж',
+        bannerGrad: 'linear-gradient(135deg, #c46b27, #3a7d8c)',
+        fact: 'Сидней — старейший город Австралии, основанный в 1788 году у берегов одной из самых больших естественных гаваней мира — Порт-Джексон. Его знаменитый Оперный театр со сводами-парусами входит в список Всемирного наследия ЮНЕСКО.'
+      },
+      {
+        id: 17, type: 'chest', name: 'МИРОВОЙ ФОНД', icon: '🏦',
+        region: 'ОБЩЕСТВЕННАЯ КАЗНА', isCapital: false,
+        country: 'Международный резерв', pop: 'Глобальный фонд',
+        landmark: 'Золотой запас и резервы',
+        bannerGrad: 'linear-gradient(135deg, #8a6424, #3d2c12)',
+        fact: 'Возьмите верхнюю карточку из колоды «Мировой фонд» и выполните указанное действие.'
+      },
+      {
+        id: 18, type: 'city', group: 'orange', color: GROUP_COLORS.orange, name: 'РИО-ДЕ-ЖАНЕЙРО',
+        price: 180, rent: [16, 80, 220, 600, 800, 1000], buildCost: 100,
+        region: 'ЮЖНАЯ АМЕРИКА', isCapital: false,
+        country: 'Бразилия (бывшая столица до 1960 г.)', pop: '6.7 млн',
+        landmark: 'Статуя Христа-Искупителя, гора Сахарная Голова и Копакабана',
+        bannerGrad: 'linear-gradient(135deg, #c46b27, #2d734b)',
+        fact: 'В январе 1502 года португальские мореплаватели приняли залив Гуанабара за устье огромной реки и назвали место «Январской рекой» (Rio de Janeiro). Внутри города находится лес Тижука — один из крупнейших в мире городских тропических лесов.'
+      },
+      {
+        id: 19, type: 'city', group: 'orange', color: GROUP_COLORS.orange, name: 'БУЭНОС-АЙРЕС',
+        price: 200, rent: [18, 90, 250, 700, 875, 1050], buildCost: 100,
+        region: 'ЮЖНАЯ АМЕРИКА', isCapital: true,
+        country: 'Аргентина', pop: '15.4 млн (агломерация)',
+        landmark: 'Обелиск на проспекте 9 Июля, театр Колон и квартал Ла-Бока',
+        bannerGrad: 'linear-gradient(135deg, #c46b27, #244b7a)',
+        fact: 'Имя города в переводе с испанского означает «Попутные ветры». Буэнос-Айрес славится как родина танго и город с наибольшим количеством книжных магазинов на душу населения в мире.'
+      },
+      {
+        id: 20, type: 'parking', name: 'БЕСПЛАТНАЯ СТОЯНКА', icon: '🅿️',
+        region: 'ЗОНА ОТДЫХА', isCapital: false,
+        country: 'Нейтральная территория', pop: 'Безопасная остановка',
+        landmark: 'Центральная площадь отдыха',
+        bannerGrad: 'linear-gradient(135deg, #2d734b, #1d5753)',
+        fact: 'Можно расслабиться! Здесь ничего не происходит ни плохого, ни хорошего — вы просто отдыхаете до следующего хода.'
+      },
+      {
+        id: 21, type: 'city', group: 'red', color: GROUP_COLORS.red, name: 'ТОРОНТО',
+        price: 220, rent: [20, 100, 300, 750, 925, 1100], buildCost: 150,
+        region: 'СЕВЕРНАЯ АМЕРИКА', isCapital: false,
+        country: 'Канада (крупнейший город страны)', pop: '6.3 млн',
+        landmark: 'Си-Эн Тауэр (553 м) и берег озера Онтарио',
+        bannerGrad: 'linear-gradient(135deg, #a3322c, #8a6424)',
+        fact: 'Название «Торонто» происходит от слова ирокезов «tkaronto», означающего «место, где деревья растут из воды». Это один из самых многонациональных городов планеты: его жители говорят более чем на 180 языках.'
+      },
+      {
+        id: 22, type: 'chance', name: 'ШАНС', icon: '❓',
+        region: 'СЛУЧАЙНОЕ СОБЫТИЕ', isCapital: false,
+        country: 'Биржа возможностей', pop: 'Непредсказуемый исход',
+        landmark: 'Центр новостей',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #183b38)',
+        fact: 'Возьмите верхнюю карточку из колоды «Шанс» и выполните указанное на ней действие.'
+      },
+      {
+        id: 23, type: 'city', group: 'red', color: GROUP_COLORS.red, name: 'НЬЮ-ЙОРК',
+        price: 220, rent: [20, 100, 300, 750, 925, 1100], buildCost: 150,
+        region: 'СЕВЕРНАЯ АМЕРИКА', isCapital: false,
+        country: 'США (штаб-квартира ООН)', pop: '18.8 млн (агломерация)',
+        landmark: 'Статуя Свободы, Центральный парк и Эмпайр-стейт-билдинг',
+        bannerGrad: 'linear-gradient(135deg, #a3322c, #244b7a)',
+        fact: 'В 1624 году голландские поселенцы основали на южной оконечности Манхэттена поселение Новый Амстердам. В 1664 году город получил имя Нью-Йорк, став со временем крупнейшим мировым центром финансов, культуры и дипломатии.'
+      },
+      {
+        id: 24, type: 'city', group: 'red', color: GROUP_COLORS.red, name: 'РИМ',
+        price: 240, rent: [22, 110, 330, 800, 975, 1150], buildCost: 150,
+        region: 'ЮЖНАЯ ЕВРОПА', isCapital: true,
+        country: 'Италия', pop: '4.3 млн',
+        landmark: 'Колизей, Пантеон, Римский форум и Ватикан',
+        bannerGrad: 'linear-gradient(135deg, #a3322c, #c59b43)',
+        fact: '«Вечный город», основанный по преданию в 753 году до н.э. на семи холмах у реки Тибр. Купол римского Пантеона, возведённый почти две тысячи лет назад без стальной арматуры, до сих пор остаётся крупнейшим в мире куполом из неармированного бетона.'
+      },
+      {
+        id: 25, type: 'railroad', name: 'ГРАНД-ЦЕНТРАЛ', price: 200, icon: '🚉',
+        region: 'ЖЕЛЕЗНОДОРОЖНАЯ МАГИСТРАЛЬ', isCapital: false,
+        country: 'Нью-Йорк, США', pop: '44 платформы и 67 путей',
+        landmark: 'Крупнейший вокзал мира по числу платформ',
+        bannerGrad: 'linear-gradient(135deg, #c4962c, #7a4b2a)',
+        fact: 'Центральный вокзал Нью-Йорка (Grand Central Terminal) занесён в Книгу рекордов Гиннесса как крупнейший железнодорожный вокзал мира по количеству платформ (44) и путей (67).'
+      },
+      {
+        id: 26, type: 'city', group: 'yellow', color: GROUP_COLORS.yellow, name: 'МАДРИД',
+        price: 260, rent: [24, 120, 360, 850, 1025, 1200], buildCost: 150,
+        region: 'ПИРЕНЕЙСКИЙ ПОЛУОСТРОВ', isCapital: true,
+        country: 'Испания', pop: '6.7 млн',
+        landmark: 'Королевский дворец, площадь Пласа-Майор и музей Прадо',
+        bannerGrad: 'linear-gradient(135deg, #c4962c, #a3322c)',
+        fact: 'Расположенный в самом географическом центре Испании на высоте 650 метров над уровнем моря, Мадрид является самой высокогорной столицей Европейского союза. В городе работает старейший в мире непрерывно действующий ресторан «Собрино де Ботин» (открыт в 1725 году).'
+      },
+      {
+        id: 27, type: 'city', group: 'yellow', color: GROUP_COLORS.yellow, name: 'БЕРЛИН',
+        price: 260, rent: [24, 120, 360, 850, 1025, 1200], buildCost: 150,
+        region: 'ЦЕНТРАЛЬНАЯ ЕВРОПА', isCapital: true,
+        country: 'Германия', pop: '3.8 млн',
+        landmark: 'Бранденбургские ворота, Рейхстаг и Музейный остров',
+        bannerGrad: 'linear-gradient(135deg, #c4962c, #4a4036)',
+        fact: 'В Берлине больше мостов (около 1700), чем в Венеции, а его Музейный остров на реке Шпрее объединяет пять всемирно известных музеев, внесённых в список Всемирного наследия ЮНЕСКО.'
+      },
+      {
+        id: 28, type: 'utility', name: 'ВОДОПРОВОД', price: 150, icon: '🚰',
+        region: 'КОММУНАЛЬНОЕ ПРЕДПРИЯТИЕ', isCapital: false,
+        country: 'Городское водоснабжение', pop: 'Водная инфраструктура',
+        landmark: 'Насосная станция и водоканал',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #8a6424)',
+        fact: 'Централизованные системы водоснабжения и очистки воды позволили современным мегаполисам вырасти до десятков миллионов жителей. Рента: 4 × кости или 10 × кости (если у владельца оба коммунальных предприятия).'
+      },
+      {
+        id: 29, type: 'city', group: 'yellow', color: GROUP_COLORS.yellow, name: 'МЕХИКО',
+        price: 280, rent: [26, 130, 390, 900, 1100, 1275], buildCost: 150,
+        region: 'МЕЗОАМЕРИКА', isCapital: true,
+        country: 'Мексика', pop: '21.8 млн (агломерация)',
+        landmark: 'Площадь Сокало, руины Темпло Майор и дворец Чапультепек',
+        bannerGrad: 'linear-gradient(135deg, #c4962c, #2d734b)',
+        fact: 'Мехико возведён на месте древней столицы ацтеков Теночтитлана, стоявшей посреди высокогорного озера Тескоко на высоте 2240 метров. Ацтеки соединяли острова дамбами и выращивали урожай на искусственных плавучих садах — чинампах.'
+      },
+      {
+        id: 30, type: 'gotojail', name: 'ОТПРАВЛЯЙСЯ В ТЮРЬМУ', icon: '🚓',
+        region: 'НАРУШЕНИЕ ЗАКОНА', isCapital: false,
+        country: 'Судебный ордер', pop: 'Немедленный перевод',
+        landmark: 'Контрольный пост',
+        bannerGrad: 'linear-gradient(135deg, #8f2d28, #1b1612)',
+        fact: 'Поместите свою фишку прямо на поле «Тюрьма»! Вы не получаете 200 $ за прохождение поля «СТАРТ», и ваш ход на этом завершается.'
+      },
+      {
+        id: 31, type: 'city', group: 'green', color: GROUP_COLORS.green, name: 'ЛОНДОН',
+        price: 300, rent: [28, 150, 450, 1000, 1200, 1400], buildCost: 200,
+        region: 'БРИТАНСКИЕ ОСТРОВА', isCapital: true,
+        country: 'Великобритания', pop: '9.6 млн',
+        landmark: 'Тауэр, Вестминстерский дворец, Биг-Бен и Британский музей',
+        bannerGrad: 'linear-gradient(135deg, #2d734b, #244b7a)',
+        fact: 'Основанный римлянами около 43 года н.э. под именем Лондиниум на реке Темзе. Через лондонский район Гринвич проходит Нулевой меридиан, от которого весь мир отсчитывает часовые пояса, а в 1863 году здесь открылось первое в мире метро.'
+      },
+      {
+        id: 32, type: 'city', group: 'green', color: GROUP_COLORS.green, name: 'ПАРИЖ',
+        price: 300, rent: [28, 150, 450, 1000, 1200, 1400], buildCost: 200,
+        region: 'ЗАПАДНАЯ ЕВРОПА', isCapital: true,
+        country: 'Франция', pop: '11.2 млн (агломерация)',
+        landmark: 'Лувр, Собор Парижской Богоматери и Эйфелева башня',
+        bannerGrad: 'linear-gradient(135deg, #2d734b, #c59b43)',
+        fact: 'Возникший в III веке до н.э. на острове Сите как поселение паризиев Лютеция, Париж стал «Городом Света» — одним из первых городов Европы, внедривших уличное освещение. Его Лувр является самым посещаемым художественным музеем мира.'
+      },
+      {
+        id: 33, type: 'chest', name: 'МИРОВОЙ ФОНД', icon: '🏦',
+        region: 'ОБЩЕСТВЕННАЯ КАЗНА', isCapital: false,
+        country: 'Международный резерв', pop: 'Глобальный фонд',
+        landmark: 'Фондовая палата',
+        bannerGrad: 'linear-gradient(135deg, #8a6424, #3d2c12)',
+        fact: 'Возьмите верхнюю карточку из колоды «Мировой фонд» и выполните указанное действие.'
+      },
+      {
+        id: 34, type: 'city', group: 'green', color: GROUP_COLORS.green, name: 'ЦЮРИХ',
+        price: 320, rent: [30, 160, 480, 1100, 1300, 1500], buildCost: 200,
+        region: 'АЛЬПИЙСКИЙ РЕГИОН', isCapital: false,
+        country: 'Швейцария (крупнейший город страны)', pop: '1.4 млн (агломерация)',
+        landmark: 'Цюрихское озеро, собор Гроссмюнстер и Банхофштрассе',
+        bannerGrad: 'linear-gradient(135deg, #2d734b, #3a7d8c)',
+        fact: 'Расположенный у истока реки Лиммат из Цюрихского озера, город ещё во времена Римской империи был важным таможенным постом Турикум. Сегодня он известен во всём мире своими банковскими традициями, часовым мастерством и высочайшим качеством жизни.'
+      },
+      {
+        id: 35, type: 'railroad', name: 'СИНКАНСЭН ТОКИО', price: 200, icon: '🚅',
+        region: 'ЖЕЛЕЗНОДОРОЖНАЯ МАГИСТРАЛЬ', isCapital: false,
+        country: 'Япония', pop: 'Первая высокоскоростная линия (1964 г.)',
+        landmark: 'Токийский вокзал и поезда-пули',
+        bannerGrad: 'linear-gradient(135deg, #244b7a, #2a7b76)',
+        fact: 'Запущенная в 1964 году к Олимпиаде в Токио сеть высокоскоростных поездов Синкансэн стала первой в мире высокоскоростной железной дорогой, изменившей стандарты пассажирских перевозок.'
+      },
+      {
+        id: 36, type: 'chance', name: 'ШАНС', icon: '❓',
+        region: 'СЛУЧАЙНОЕ СОБЫТИЕ', isCapital: false,
+        country: 'Биржа возможностей', pop: 'Непредсказуемый исход',
+        landmark: 'Информационное бюро',
+        bannerGrad: 'linear-gradient(135deg, #2a7b76, #183b38)',
+        fact: 'Возьмите верхнюю карточку из колоды «Шанс» и выполните указанное действие.'
+      },
+      {
+        id: 37, type: 'city', group: 'darkblue', color: GROUP_COLORS.darkblue, name: 'САН-ФРАНЦИСКО',
+        price: 350, rent: [35, 175, 500, 1100, 1300, 1500], buildCost: 200,
+        region: 'ТИХООКЕАНСКОЕ ПОБЕРЕЖЬЕ', isCapital: false,
+        country: 'США (Калифорния)', pop: '4.7 млн (агломерация)',
+        landmark: 'Мост Золотые Ворота и холмы залива',
+        bannerGrad: 'linear-gradient(135deg, #244b7a, #a3322c)',
+        fact: 'Расположенный на 43 холмах у пролива Золотые Ворота, город пережил стремительный расцвет во время Калифорнийской золотой лихорадки 1849 года, а в XX веке стал колыбелью мировой цифровой революции и Кремниевой долины.'
+      },
+      {
+        id: 38, type: 'tax', name: 'СВЕРХНАЛОГ НА РОСКОШЬ', amount: 100, icon: '💎',
+        region: 'НАЛОГОВАЯ СЛУЖБА', isCapital: false,
+        country: 'Государственный бюджет', pop: 'Сбор 100 $',
+        landmark: 'Таможенная и налоговая палата',
+        bannerGrad: 'linear-gradient(135deg, #8a6424, #231911)',
+        fact: 'Владельцы элитной недвижимости и крупных капиталов уплачивают в Банк дополнительный налог на роскошь в размере 100 $.'
+      },
+      {
+        id: 39, type: 'city', group: 'darkblue', color: GROUP_COLORS.darkblue, name: 'ТОКИО',
+        price: 400, rent: [50, 200, 600, 1400, 1700, 2000], buildCost: 200,
+        region: 'ВОСТОЧНАЯ АЗИЯ', isCapital: true,
+        country: 'Япония', pop: '37.4 млн (крупнейшая агломерация мира)',
+        landmark: 'Императорский дворец, храм Сэнсо-дзи и вид на гору Фудзи',
+        bannerGrad: 'linear-gradient(135deg, #244b7a, #c59b43)',
+        fact: 'До 1868 года город носил имя Эдо и был резиденцией сёгунов. После реставрации Мэйдзи сюда переехал император, переименовав город в Токио («Восточная столица»). Сегодня это самый населённый мегаполис планеты.'
+      }
+    ];
+
+    const CHANCE_CARDS = [
+      { title: 'ВЫГОДНЫЙ КОНТРАКТ', desc: 'Ваши инвестиции в международную торговлю окупились. Получите 150 $ из Банка!', action: 'money', value: 150, icon: '📈' },
+      { title: 'ОТПРАВЛЯЙТЕСЬ НА СТАРТ', desc: 'Переместитесь на поле «СТАРТ» и получите 200 $ в Банке.', action: 'move', target: 0, collectGo: true, icon: '🏁' },
+      { title: 'ЭКСПЕДИЦИЯ В ТОКИО', desc: 'Отправляйтесь в Токио! Если пройдёте поле «СТАРТ» — получите 200 $.', action: 'move', target: 39, collectGo: true, icon: '🏯' },
+      { title: 'ПОЕЗДКА В РИМ', desc: 'Отправляйтесь в Рим. Если пройдёте поле «СТАРТ» — получите 200 $.', action: 'move', target: 24, collectGo: true, icon: '🏛️' },
+      { title: 'КАПИТАЛЬНЫЙ РЕМОНТ', desc: 'Ремонт недвижимости: заплатите в Банк по 25 $ за каждый Дом и 100 $ за каждый Отель.', action: 'repairs', houseCost: 25, hotelCost: 100, icon: '🔨' },
+      { title: 'ВЫЙТИ ИЗ ТЮРЬМЫ БЕСПЛАТНО', desc: 'Эту карточку можно сохранить или продать другому игроку для бесплатного освобождения из Тюрьмы.', action: 'jailCard', icon: '🎖️' },
+      { title: 'ЗАДЕРЖКА В ПУТИ', desc: 'Непредвиденная остановка: вернитесь на 3 клетки назад.', action: 'moveRel', offset: -3, icon: '⏪' },
+      { title: 'ОТПРАВЛЯЙСЯ В ТЮРЬМУ', desc: 'Отправляйтесь прямо в Тюрьму! Не проходите поле «СТАРТ» и не получайте 200 $.', action: 'jail', icon: '⛓️' },
+      { title: 'ПРЕДСЕДАТЕЛЬ СОВЕТА ДИРЕКТОРОВ', desc: 'Вы избраны председателем совета: выплатите каждому игроку по 25 $.', action: 'payAll', value: 25, icon: '🤝' },
+      { title: 'ДИВИДЕНДЫ БАНКА', desc: 'Банк выплачивает вам дивиденды в размере 100 $!', action: 'money', value: 100, icon: '💵' }
+    ];
+
+    const CHEST_CARDS = [
+      { title: 'БАНКОВСКАЯ ОШИБКА В ВАШУ ПОЛЬЗУ', desc: 'Получите 200 $ из Банка!', action: 'money', value: 200, icon: '💰' },
+      { title: 'НАСЛЕДСТВО', desc: 'Вы получили наследство: +100 $ на ваш счёт.', action: 'money', value: 100, icon: '🏛️' },
+      { title: 'ОПЛАТА ЛЕЧЕНИЯ', desc: 'Заплатите в Банк 50 $ за медицинскую страховку.', action: 'money', value: -50, icon: '⚕️' },
+      { title: 'ДЕНЬ РОЖДЕНИЯ', desc: 'Каждый игрок дарит вам по 30 $!', action: 'collectAll', value: 30, icon: '🎁' },
+      { title: 'ВЫЙТИ ИЗ ТЮРЬМЫ БЕСПЛАТНО', desc: 'Сохраните эту карточку для бесплатного выхода из Тюрьмы в любой момент.', action: 'jailCard', icon: '📜' },
+      { title: 'ВОЗВРАТ НАЛОГОВ', desc: 'Налоговая служба возвращает вам 75 $ из Банка.', action: 'money', value: 75, icon: '⚖️' },
+      { title: 'СТРАХОВОЙ ВЗНОС', desc: 'Заплатите в Банк 100 $ за страхование недвижимости.', action: 'money', value: -100, icon: '🛡️' },
+      { title: 'ВОЗВРАЩЕНИЕ НА СТАРТ', desc: 'Переместитесь на поле «СТАРТ» и получите 200 $!', action: 'move', target: 0, collectGo: true, icon: '🏁' }
+    ];
+
+    /* ==========================================================================
+       3. СОСТОЯНИЕ ИГРЫ (В ТОМ ЧИСЛЕ БАНК: 32 ДОМА И 12 ОТЕЛЕЙ)
+       ========================================================================== */
+    const PLAYER_PALETTE = [
+      { name: 'Игрок 1', color: '#2a7b76' },
+      { name: 'Игрок 2', color: '#c59b43' },
+      { name: 'Игрок 3', color: '#9e332d' },
+      { name: 'Игрок 4', color: '#2b588c' },
+      { name: 'Игрок 5', color: '#c46b27' },
+      { name: 'Игрок 6', color: '#2f7a4e' },
+      { name: 'Игрок 7', color: '#7b4378' }
+    ];
+
+    const AVATAR_PRESETS = [
+      { icon: '👑', label: 'Корона' },
+      { icon: '🚀', label: 'Ракета' },
+      { icon: '🐺', label: 'Волк' },
+      { icon: '💎', label: 'Алмаз' },
+      { icon: '⚡', label: 'Молния' },
+      { icon: '🛡️', label: 'Щит' },
+      { icon: '🧭', label: 'Компас' }
+    ];
+
+    let setupCount = 4;
+    let setupConfigs = [];
+
+    let state = {
+      players: [],
+      properties: {},
+      currentPlayerIndex: 0,
+      hasRolled: false,
+      doublesCount: 0,
+      isAnimating: false,
+      gameOver: false,
+      bankHouses: 32,
+      bankHotels: 12,
+      pendingDebt: null // { debtorId, creditorId, amount, reason }
+    };
+
+    let auctionState = {
+      active: false,
+      tileId: null,
+      currentBid: 10,
+      leaderId: null,
+      activeBidders: [],
+      turnIndex: 0
+    };
+
+    /* ==========================================================================
+       4. АДАПТИВНОЕ МАСШТАБИРОВАНИЕ ПОЛЯ (ТЕЛЕФОН, ПЛАНШЕТ, ROTATE)
+       ========================================================================== */
+    function resizeBoardToFit() {
+      const container = document.getElementById('boardContainer');
+      const board = document.getElementById('boardGrid');
+      if (!container || !board) return;
+
+      const rect = container.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+
+      const size = Math.floor(Math.min(rect.width, rect.height) - 4);
+      if (size > 160) {
+        board.style.width = `${size}px`;
+        board.style.height = `${size}px`;
+      }
+    }
+
+    function toggleFullscreen() {
+      sfx.click();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    /* ==========================================================================
+       5. НАСТРОЙКА ЛОББИ (2–7 ИГРОКОВ)
+       ========================================================================== */
+    function renderAvatarVisual(avatarIdx, sizeClass = 'text-xl') {
+      const customFile = ASSET_CONFIG.playerIcons[avatarIdx];
+      if (customFile) {
+        const url = getAssetUrl(customFile);
+        return `<img src="${url}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><span style="display:none" class="${sizeClass}">${AVATAR_PRESETS[avatarIdx].icon}</span>`;
+      }
+      return `<span class="${sizeClass}">${AVATAR_PRESETS[avatarIdx].icon}</span>`;
+    }
+
+    function renderSpecialTileIcon(tile, sizeClass = 'w-6 h-6 sm:w-8 sm:h-8', emojiClass = 'text-xs sm:text-base') {
+      const customFile = ASSET_CONFIG.specialTileIcons[tile.id];
+      if (customFile) {
+        const url = getAssetUrl(customFile);
+        return `<img src="${url}" alt="${tile.name}" class="${sizeClass} mx-auto rounded object-cover border border-[#8a6424]/70 shadow-xs" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" /><div style="display:none" class="${emojiClass} text-center leading-none">${tile.icon}</div>`;
+      }
+      return `<div class="${emojiClass} text-center leading-none">${tile.icon}</div>`;
+    }
+
+    function initSetupUI() {
+      setupConfigs = Array.from({ length: 7 }, (_, i) => ({
+        name: PLAYER_PALETTE[i].name,
+        color: PLAYER_PALETTE[i].color,
+        avatarIdx: i
+      }));
+      renderCountSelector();
+      renderPlayersSetupList();
+    }
+
+    function renderCountSelector() {
+      const container = document.getElementById('countSelector');
+      container.innerHTML = '';
+      for (let n = 2; n <= 7; n++) {
+        const active = n === setupCount;
+        const btn = document.createElement('button');
+        btn.className = `py-2 rounded-lg font-historic font-bold text-sm transition-all border ${
+          active
+            ? 'bg-[#2a7b76] border-[#1d5753] text-[#f5ebd6] shadow'
+            : 'bg-[#e6d1a7] border-[#8a6424]/50 text-[#38291c] hover:bg-[#dec391]'
+        }`;
+        btn.textContent = n;
+        btn.onclick = () => {
+          sfx.click();
+          setupCount = n;
+          document.getElementById('playerCountLabel').textContent = `${n} ${getPlayersWord(n)}`;
+          renderCountSelector();
+          renderPlayersSetupList();
+        };
+        container.appendChild(btn);
+      }
+    }
+
+    function getPlayersWord(n) {
+      if (n === 1) return 'ИГРОК';
+      if (n >= 2 && n <= 4) return 'ИГРОКА';
+      return 'ИГРОКОВ';
+    }
+
+    function renderPlayersSetupList() {
+      const list = document.getElementById('playersSetupList');
+      list.innerHTML = '';
+      for (let i = 0; i < setupCount; i++) {
+        const cfg = setupConfigs[i];
+        const card = document.createElement('div');
+        card.className = 'flex items-center gap-2.5 p-2.5 rounded-lg bg-[#e6d1a7]/80 border border-[#8a6424]/50';
+        card.innerHTML = `
+          <button type="button" onclick="cycleAvatar(${i})" title="Сменить фишку"
+            class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-[#1b1510] text-[#f5ebd6] transition-transform active:scale-90"
+            style="border: 2.5px solid ${cfg.color};">
+            ${renderAvatarVisual(cfg.avatarIdx, 'text-xl')}
+          </button>
+          <div class="flex-1 min-w-0">
+            <div class="text-[10px] uppercase tracking-wider font-bold" style="color:${cfg.color}">Игрок №${i + 1}</div>
+            <input type="text" maxlength="16" value="${cfg.name}"
+              oninput="setupConfigs[${i}].name = this.value.trim() || 'Игрок ${i + 1}'"
+              class="w-full bg-transparent border-b border-[#8a6424]/50 focus:border-[#1d5753] outline-none text-sm font-bold text-[#231911] py-0.5"
+              placeholder="Имя игрока" />
+          </div>
+        `;
+        list.appendChild(card);
+      }
+    }
+
+    function cycleAvatar(idx) {
+      sfx.click();
+      setupConfigs[idx].avatarIdx = (setupConfigs[idx].avatarIdx + 1) % AVATAR_PRESETS.length;
+      renderPlayersSetupList();
+    }
+
+    /* ==========================================================================
+       6. СТАРТ ИГРЫ И ОТРИСОВКА ПОЛЯ 11x11
+       ========================================================================== */
+    function startGame() {
+      sfx.init();
+      sfx.scrollOpen();
+
+      state.players = [];
+      state.properties = {};
+      state.currentPlayerIndex = 0;
+      state.hasRolled = false;
+      state.doublesCount = 0;
+      state.isAnimating = false;
+      state.gameOver = false;
+      state.bankHouses = 32;
+      state.bankHotels = 12;
+      state.pendingDebt = null;
+
+      for (let i = 0; i < setupCount; i++) {
+        const cfg = setupConfigs[i];
+        state.players.push({
+          id: i,
+          name: cfg.name || `Игрок ${i + 1}`,
+          color: cfg.color,
+          avatarIdx: cfg.avatarIdx,
+          money: 1500,
+          position: 0,
+          inJail: false,
+          jailTurns: 0,
+          jailCards: 0,
+          bankrupt: false
+        });
+      }
+
+      BOARD_TILES.forEach(t => {
+        if (['city', 'railroad', 'utility'].includes(t.type)) {
+          state.properties[t.id] = {
+            ownerId: null,
+            houses: 0,
+            mortgaged: false
+          };
+        }
+      });
+
+      document.getElementById('setupScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+
+      buildBoardDOM();
+      renderDice(1, 1);
+      updateAllUI();
+      requestAnimationFrame(resizeBoardToFit);
+      setTimeout(resizeBoardToFit, 80);
+      addLog(`Игра началась! Участников: ${setupCount}. Стартовый капитал: 1500 $. В Банке: 32 Дома и 12 Отелей.`);
+    }
+
+    function getGridCoords(tileId) {
+      if (tileId >= 0 && tileId <= 10) return { row: 11, col: 11 - tileId };
+      if (tileId >= 11 && tileId <= 19) return { row: 11 - (tileId - 10), col: 1 };
+      if (tileId >= 20 && tileId <= 30) return { row: 1, col: 1 + (tileId - 20) };
+      return { row: 1 + (tileId - 30), col: 11 };
+    }
+
+    function buildBoardDOM() {
+      const board = document.getElementById('boardGrid');
+      board.querySelectorAll('.tile').forEach(el => el.remove());
+
+      BOARD_TILES.forEach(tile => {
+        const { row, col } = getGridCoords(tile.id);
+        const div = document.createElement('div');
+        const isCorner = [0, 10, 20, 30].includes(tile.id);
+        div.id = `tile-${tile.id}`;
+        div.className = `tile ${isCorner ? 'corner-tile' : ''}`;
+        div.style.gridRow = row;
+        div.style.gridColumn = col;
+        div.onclick = () => {
+          sfx.scrollOpen();
+          openCityModal(tile.id, null);
+        };
+
+        if (isCorner) {
+          div.innerHTML = `
+            ${renderSpecialTileIcon(tile, 'w-6 h-6 sm:w-9 sm:h-9', 'text-sm sm:text-xl')}
+            <div class="tile-name font-historic text-[6.5px] sm:text-[9.5px] text-[#231911] mt-0.5">${tile.name}</div>
+            <div id="tokens-${tile.id}" class="tokens-container"></div>
+          `;
+        } else if (tile.type === 'city') {
+          div.innerHTML = `
+            <div id="bar-${tile.id}" class="color-bar" style="background:${tile.color};"></div>
+            <div class="tile-name">${tile.name}</div>
+            <div id="price-${tile.id}" class="tile-price">${tile.price} $</div>
+            <div id="owner-${tile.id}" class="owner-dot hidden"></div>
+            <div id="tokens-${tile.id}" class="tokens-container"></div>
+          `;
+        } else {
+          const priceLabel = tile.price ? `${tile.price} $` : (tile.amount ? `-${tile.amount} $` : '');
+          div.innerHTML = `
+            <div class="pt-0.5">${renderSpecialTileIcon(tile, 'w-4 h-4 sm:w-6 sm:h-6', 'text-xs sm:text-base')}</div>
+            <div class="tile-name">${tile.name}</div>
+            <div id="price-${tile.id}" class="tile-price">${priceLabel}</div>
+            <div id="owner-${tile.id}" class="owner-dot hidden"></div>
+            <div id="tokens-${tile.id}" class="tokens-container"></div>
+          `;
+        }
+
+        board.appendChild(div);
+      });
+    }
+
+    /* ==========================================================================
+       7. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+       ========================================================================== */
+    function updateAllUI() {
+      renderPlayersHUD();
+      renderBoardState();
+      renderTurnControls();
+      const bankBadge = document.getElementById('bankSupplyBadge');
+      if (bankBadge) {
+        bankBadge.textContent = `В Банке осталось: ${state.bankHouses} Домов • ${state.bankHotels} Отелей`;
+      }
+    }
+
+    function renderPlayersHUD() {
+      const container = document.getElementById('playersHudList');
+      container.innerHTML = '';
+
+      state.players.forEach((p, idx) => {
+        const isCurrent = idx === state.currentPlayerIndex && !p.bankrupt;
+        const ownedCount = Object.values(state.properties).filter(pr => pr.ownerId === p.id).length;
+
+        const card = document.createElement('div');
+        card.className = `obsidian-panel rounded-lg p-1.5 sm:p-2 flex items-center justify-between gap-2 shrink-0 min-w-[132px] transition-all ${
+          isCurrent ? 'ring-1 ring-[#e2be6b] bg-[#292018]' : ''
+        } ${p.bankrupt ? 'opacity-40 grayscale' : ''}`;
+
+        card.innerHTML = `
+          <div class="flex items-center gap-1.5 min-w-0">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-[#120e0b]"
+              style="border: 2px solid ${p.color};">
+              ${renderAvatarVisual(p.avatarIdx, 'text-sm')}
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] sm:text-xs font-bold truncate text-[#f2e6cf] flex items-center gap-1">
+                <span>${p.name}</span>
+                ${p.inJail ? '<span title="В тюрьме">⛓️</span>' : ''}
+                ${p.jailCards > 0 ? `<span title="Карта свободы">📜${p.jailCards}</span>` : ''}
+              </div>
+              <div class="text-[9px] sm:text-[10px] text-[#a8947a]">
+                ${p.bankrupt ? 'Банкрот' : `Участков: ${ownedCount}`}
+              </div>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="font-historic text-xs sm:text-sm font-bold ${p.money < 100 ? 'text-[#e06c65]' : 'text-[#e2be6b]'}">
+              ${p.bankrupt ? '0 $' : `${p.money} $`}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderBoardState() {
+      const currentP = state.players[state.currentPlayerIndex];
+
+      BOARD_TILES.forEach(tile => {
+        const tileEl = document.getElementById(`tile-${tile.id}`);
+        if (!tileEl) return;
+
+        if (currentP && !currentP.bankrupt && currentP.position === tile.id) {
+          tileEl.classList.add('tile-active-glow');
+        } else {
+          tileEl.classList.remove('tile-active-glow');
+        }
+
+        const prop = state.properties[tile.id];
+        if (prop) {
+          const ownerDot = document.getElementById(`owner-${tile.id}`);
+          if (prop.ownerId !== null) {
+            const owner = state.players[prop.ownerId];
+            ownerDot.classList.remove('hidden');
+            ownerDot.style.backgroundColor = owner.color;
+          } else {
+            ownerDot.classList.add('hidden');
+          }
+
+          if (prop.mortgaged) tileEl.classList.add('tile-mortgaged');
+          else tileEl.classList.remove('tile-mortgaged');
+
+          if (tile.type === 'city') {
+            const bar = document.getElementById(`bar-${tile.id}`);
+            bar.innerHTML = '';
+            if (prop.houses === 5) {
+              bar.innerHTML = `<div class="building-citadel" title="Отель"></div>`;
+            } else {
+              for (let h = 0; h < prop.houses; h++) {
+                bar.innerHTML += `<div class="building-pip" title="Дом"></div>`;
+              }
+            }
+          }
+        }
+
+        const tokensBox = document.getElementById(`tokens-${tile.id}`);
+        tokensBox.innerHTML = '';
+        state.players.forEach((p, idx) => {
+          if (!p.bankrupt && p.position === tile.id) {
+            const tok = document.createElement('div');
+            tok.className = `player-token ${idx === state.currentPlayerIndex ? 'active-turn' : ''}`;
+            tok.style.setProperty('--p-color', p.color);
+            tok.innerHTML = renderAvatarVisual(p.avatarIdx, 'text-xs');
+            tokensBox.appendChild(tok);
+          }
+        });
+      });
+    }
+
+    function renderTurnControls() {
+      const p = state.players[state.currentPlayerIndex];
+      if (!p) return;
+
+      const banner = document.getElementById('turnBanner');
+      banner.style.borderColor = p.color;
+      const turnAvatar = document.getElementById('turnAvatar');
+      turnAvatar.className = 'w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden flex items-center justify-center bg-[#120e0b] shrink-0';
+      turnAvatar.style.border = `1.5px solid ${p.color}`;
+      turnAvatar.innerHTML = renderAvatarVisual(p.avatarIdx, 'text-xs');
+
+      document.getElementById('turnName').textContent = p.name;
+      document.getElementById('turnMoney').textContent = `${p.money} $`;
+
+      const rollBtn = document.getElementById('rollBtn');
+      const endBtn = document.getElementById('endTurnBtn');
+      const bailBtn = document.getElementById('payBailBtn');
+      const jailCardBtn = document.getElementById('useJailCardBtn');
+      const rescueBtn = document.getElementById('rescueBtn');
+
+      if (state.pendingDebt) {
+        rollBtn.classList.add('hidden');
+        endBtn.classList.add('hidden');
+        bailBtn.classList.add('hidden');
+        jailCardBtn.classList.add('hidden');
+        rescueBtn.classList.remove('hidden');
+        return;
+      } else {
+        rescueBtn.classList.add('hidden');
+      }
+
+      rollBtn.disabled = state.isAnimating || state.hasRolled || state.gameOver;
+      if (!state.hasRolled && !state.isAnimating) {
+        rollBtn.classList.remove('hidden');
+        endBtn.classList.add('hidden');
+      } else if (state.hasRolled && !state.isAnimating) {
+        rollBtn.classList.add('hidden');
+        endBtn.classList.remove('hidden');
+      } else {
+        rollBtn.classList.add('hidden');
+        endBtn.classList.add('hidden');
+      }
+
+      if (p.inJail && !state.hasRolled && !state.isAnimating) {
+        bailBtn.classList.remove('hidden');
+        bailBtn.disabled = p.money < 50;
+        if (p.jailCards > 0) jailCardBtn.classList.remove('hidden');
+        else jailCardBtn.classList.add('hidden');
+      } else {
+        bailBtn.classList.add('hidden');
+        jailCardBtn.classList.add('hidden');
+      }
+    }
+
+    /* ==========================================================================
+       8. КУБИКИ И ПЕРЕМЕЩЕНИЕ
+       ========================================================================== */
+    const DICE_PATTERNS = {
+      1: [4],
+      2: [0, 8],
+      3: [0, 4, 8],
+      4: [0, 2, 6, 8],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 2, 3, 5, 6, 8]
+    };
+
+    function renderDice(val1, val2, rolling = false) {
+      [
+        { el: document.getElementById('dice1'), val: val1 },
+        { el: document.getElementById('dice2'), val: val2 }
+      ].forEach(({ el, val }) => {
+        if (rolling) el.classList.add('dice-rolling');
+        else el.classList.remove('dice-rolling');
+
+        el.innerHTML = '';
+        const activeIndices = DICE_PATTERNS[val] || [4];
+        const isRed = val === 1 || val === 6;
+        for (let i = 0; i < 9; i++) {
+          const pip = document.createElement('div');
+          pip.className = `pip ${activeIndices.includes(i) ? 'on' : ''} ${isRed ? 'red-pip' : ''}`;
+          el.appendChild(pip);
+        }
+      });
+    }
+
+    async function handleRollDice() {
+      if (state.isAnimating || state.hasRolled || state.gameOver || state.pendingDebt) return;
+      const p = state.players[state.currentPlayerIndex];
+
+      state.isAnimating = true;
+      renderTurnControls();
+      sfx.diceRoll();
+
+      let d1 = 1, d2 = 1;
+      for (let i = 0; i < 9; i++) {
+        d1 = Math.floor(Math.random() * 6) + 1;
+        d2 = Math.floor(Math.random() * 6) + 1;
+        renderDice(d1, d2, true);
+        await sleep(55);
+      }
+      renderDice(d1, d2, false);
+
+      const isDouble = d1 === d2;
+      const sum = d1 + d2;
+      setStatus(`${p.name}: выпало ${d1} и ${d2} (сумма ${sum})${isDouble ? ' — ДУБЛЬ!' : ''}`);
+
+      if (p.inJail) {
+        if (isDouble) {
+          p.inJail = false;
+          p.jailTurns = 0;
+          addLog(`${p.name} выбросил дубль (${d1}:${d2}) и вышел из Тюрьмы!`, 'text-[#6ec2bc]');
+          state.doublesCount = 0;
+          await movePlayerSteps(p, sum);
+          state.hasRolled = true;
+          state.isAnimating = false;
+          updateAllUI();
+        } else {
+          p.jailTurns++;
+          if (p.jailTurns >= 3) {
+            addLog(`${p.name} не выбросил дубль за 3 хода, заплатил 50 $ и вышел из Тюрьмы.`, 'text-[#e2be6b]');
+            p.inJail = false;
+            p.jailTurns = 0;
+            requestPayment(p, null, 50, 'Штраф за выход из Тюрьмы');
+            if (!state.pendingDebt && !p.bankrupt) {
+              await movePlayerSteps(p, sum);
+            }
+          } else {
+            addLog(`${p.name} остаётся в Тюрьме (попытка ${p.jailTurns}/3).`);
+          }
+          state.hasRolled = true;
+          state.isAnimating = false;
+          updateAllUI();
+        }
+        return;
+      }
+
+      if (isDouble) {
+        state.doublesCount++;
+        if (state.doublesCount >= 3) {
+          addLog(`Три дубля подряд! ${p.name} отправляется в Тюрьму.`, 'text-[#e06c65]');
+          sendPlayerToJail(p);
+          state.hasRolled = true;
+          state.isAnimating = false;
+          updateAllUI();
+          return;
+        }
+      } else {
+        state.doublesCount = 0;
+      }
+
+      await movePlayerSteps(p, sum);
+
+      if (isDouble && !p.inJail && !p.bankrupt && !state.pendingDebt) {
+        state.hasRolled = false;
+        setStatus(`Дубль! ${p.name} бросает кубики ещё раз.`);
+        addLog(`${p.name} выбросил дубль и ходит снова!`, 'text-[#6ec2bc]');
+      } else {
+        state.hasRolled = true;
+      }
+
+      state.isAnimating = false;
+      updateAllUI();
+    }
+
+    async function movePlayerSteps(player, steps) {
+      const dir = steps >= 0 ? 1 : -1;
+      const total = Math.abs(steps);
+
+      for (let s = 0; s < total; s++) {
+        player.position = (player.position + dir + 40) % 40;
+        sfx.step();
+        if (dir > 0 && player.position === 0) {
+          changeMoney(player, 200);
+          addLog(`${player.name} прошёл поле «СТАРТ» и получил +200 $!`, 'text-[#e2be6b]');
+        }
+        renderBoardState();
+        renderPlayersHUD();
+        await sleep(165);
+      }
+
+      await resolveTileLanding(player, Math.abs(steps));
+    }
+
+    async function resolveTileLanding(player, lastDiceSum) {
+      const tile = BOARD_TILES[player.position];
+      addLog(`${player.name} остановился на «${tile.name}».`);
+
+      if (tile.type === 'start') {
+        setStatus(`${player.name} на поле «СТАРТ» (+200 $).`);
+        openCityModal(tile.id, { type: 'info', notice: 'Вы на поле «СТАРТ». Получено +200 $ из Банка.' });
+      }
+      else if (tile.type === 'parking') {
+        setStatus(`${player.name} на Бесплатной стоянке.`);
+        openCityModal(tile.id, { type: 'info', notice: 'Бесплатная стоянка: можно расслабиться до следующего хода.' });
+      }
+      else if (tile.type === 'jail') {
+        setStatus(`${player.name} на экскурсии у Тюрьмы.`);
+        openCityModal(tile.id, { type: 'info', notice: 'Вы остановились в зоне «На экскурсии».' });
+      }
+      else if (tile.type === 'gotojail') {
+        setStatus(`Отправляйся в Тюрьму! ${player.name} заключён под стражу.`);
+        addLog(`${player.name} отправлен в Тюрьму!`, 'text-[#e06c65]');
+        sendPlayerToJail(player);
+        openCityModal(tile.id, { type: 'info', notice: 'Вы в Тюрьме. Выйти можно за 50 $, по карточке свободы или выбросив дубль.' });
+      }
+      else if (tile.type === 'tax') {
+        setStatus(`${player.name}: оплата налога ${tile.amount} $.`);
+        addLog(`${player.name} должен уплатить налог ${tile.amount} $ (${tile.name}).`, 'text-[#e06c65]');
+        const paid = requestPayment(player, null, tile.amount, tile.name);
+        if (paid) {
+          openCityModal(tile.id, { type: 'info', notice: `Уплачен налог в Банк: -${tile.amount} $.` });
+        }
+      }
+      else if (tile.type === 'chance') {
+        const card = CHANCE_CARDS[Math.floor(Math.random() * CHANCE_CARDS.length)];
+        await showAndExecuteEventCard(player, 'ШАНС', card);
+      }
+      else if (tile.type === 'chest') {
+        const card = CHEST_CARDS[Math.floor(Math.random() * CHEST_CARDS.length)];
+        await showAndExecuteEventCard(player, 'МИРОВОЙ ФОНД', card);
+      }
+      else if (['city', 'railroad', 'utility'].includes(tile.type)) {
+        const prop = state.properties[tile.id];
+
+        if (prop.ownerId === null) {
+          setStatus(`${tile.name}: свободная собственность (${tile.price} $).`);
+          openCityModal(tile.id, { type: 'buy' });
+        } else if (prop.ownerId === player.id) {
+          setStatus(`${player.name} на своей собственности: ${tile.name}.`);
+          openCityModal(tile.id, { type: 'own', notice: 'Эта собственность принадлежит вам.' });
+        } else {
+          const owner = state.players[prop.ownerId];
+          if (prop.mortgaged) {
+            setStatus(`${tile.name} в залоге (${owner.name}). Рента не взимается.`);
+            openCityModal(tile.id, { type: 'info', notice: `Собственность игрока ${owner.name} заложена — рента не взимается.` });
+          } else {
+            const rent = calculateRent(tile, prop, lastDiceSum);
+            setStatus(`${player.name}: рента ${rent} $ игроку ${owner.name}.`);
+            addLog(`${player.name} платит ренту ${rent} $ игроку ${owner.name} за «${tile.name}».`, 'text-[#e2be6b]');
+            const paid = requestPayment(player, owner, rent, `Рента за «${tile.name}»`);
+            if (paid) {
+              openCityModal(tile.id, {
+                type: 'rent',
+                notice: `Уплачена рента ${rent} $ владельцу (${owner.name}).`
+              });
+            }
+          }
+        }
+      }
+    }
+
+    function calculateRent(tile, prop, diceSum = 7) {
+      if (tile.type === 'city') {
+        const hasMonopoly = playerOwnsGroup(prop.ownerId, tile.group);
+        if (prop.houses === 0) {
+          return hasMonopoly ? tile.rent[0] * 2 : tile.rent[0];
+        }
+        return tile.rent[prop.houses];
+      }
+      if (tile.type === 'railroad') {
+        const rrCount = BOARD_TILES.filter(
+          t => t.type === 'railroad' && state.properties[t.id].ownerId === prop.ownerId && !state.properties[t.id].mortgaged
+        ).length;
+        return 25 * Math.pow(2, Math.max(0, rrCount - 1));
+      }
+      if (tile.type === 'utility') {
+        const utilCount = BOARD_TILES.filter(
+          t => t.type === 'utility' && state.properties[t.id].ownerId === prop.ownerId && !state.properties[t.id].mortgaged
+        ).length;
+        return (utilCount >= 2 ? 10 : 4) * diceSum;
+      }
+      return 0;
+    }
+
+    function playerOwnsGroup(playerId, group) {
+      if (playerId === null) return false;
+      const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === group);
+      return groupTiles.every(t => state.properties[t.id].ownerId === playerId);
+    }
+
+    function groupHasAnyMortgage(group) {
+      const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === group);
+      return groupTiles.some(t => state.properties[t.id].mortgaged);
+    }
+
+    function groupHasAnyBuildings(group) {
+      const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === group);
+      return groupTiles.some(t => state.properties[t.id].houses > 0);
+    }
+
+    /* ==========================================================================
+       9. КАРТОЧКА ГОРОДА (ИНТЕРЕСНЫЕ ФАКТЫ + ПОКУПКА ИЛИ АУКЦИОН)
+       ========================================================================== */
+    function openCityModal(tileId, actionContext) {
+      const tile = BOARD_TILES[tileId];
+      const modal = document.getElementById('cityModal');
+
+      const imgEl = document.getElementById('modalCityImage');
+      const bannerEl = document.getElementById('modalBannerContainer');
+      const customImg = ASSET_CONFIG.cityImages[tile.id];
+
+      bannerEl.style.background = tile.bannerGrad || 'linear-gradient(135deg, #2a7b76, #1a120b)';
+      if (customImg) {
+        imgEl.src = getAssetUrl(customImg);
+        imgEl.classList.remove('hidden');
+        imgEl.onerror = () => imgEl.classList.add('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+      }
+
+      document.getElementById('modalRegionBadge').textContent = tile.region || 'МИР';
+      const capBadge = document.getElementById('modalCapitalBadge');
+      if (tile.isCapital) capBadge.classList.remove('hidden');
+      else capBadge.classList.add('hidden');
+
+      document.getElementById('modalCityName').textContent = tile.name;
+      document.getElementById('modalCountryInfo').textContent = `${tile.country} • ${tile.pop}`;
+      document.getElementById('modalLandmark').textContent = `🏛️ Достопримечательность: ${tile.landmark}`;
+      document.getElementById('modalFactText').textContent = tile.fact;
+
+      const ecoBlock = document.getElementById('modalEconomyBlock');
+      const isBuyable = ['city', 'railroad', 'utility'].includes(tile.type);
+
+      if (isBuyable) {
+        ecoBlock.classList.remove('hidden');
+        const prop = state.properties[tile.id];
+        document.getElementById('modalPrice').textContent = `${tile.price} $`;
+
+        if (tile.type === 'city') {
+          document.getElementById('modalRent').textContent = `${tile.rent[0]} / ${tile.rent[0] * 2} $ (Отель: ${tile.rent[5]} $)`;
+          document.getElementById('modalBuildCost').textContent = `${tile.buildCost} $`;
+        } else if (tile.type === 'railroad') {
+          document.getElementById('modalRent').textContent = '25 / 50 / 100 / 200 $';
+          document.getElementById('modalBuildCost').textContent = 'Зависит от числа станций';
+        } else {
+          document.getElementById('modalRent').textContent = '4× или 10× от суммы кубиков';
+          document.getElementById('modalBuildCost').textContent = 'Зависит от числа предприятий';
+        }
+
+        const ownerEl = document.getElementById('modalOwner');
+        if (prop.ownerId === null) {
+          ownerEl.textContent = 'Свободно (можно купить или выставить на аукцион)';
+          ownerEl.style.color = '#1d5753';
+        } else {
+          const owner = state.players[prop.ownerId];
+          ownerEl.textContent = `${owner.name}${prop.mortgaged ? ' [ЗАЛОЖЕНО]' : ''}`;
+          ownerEl.style.color = owner.color;
+        }
+      } else {
+        ecoBlock.classList.add('hidden');
+      }
+
+      const noticeEl = document.getElementById('modalActionNotice');
+      const btnsEl = document.getElementById('modalButtons');
+      btnsEl.innerHTML = '';
+
+      if (actionContext && actionContext.notice) {
+        noticeEl.classList.remove('hidden');
+        noticeEl.textContent = actionContext.notice;
+        noticeEl.className = `rounded-lg p-3 text-xs sm:text-sm font-semibold text-center border ${
+          actionContext.type === 'rent'
+            ? 'bg-[#8f2d28]/15 border-[#8f2d28] text-[#6e1c18]'
+            : 'bg-[#2a7b76]/15 border-[#2a7b76] text-[#16423f]'
+        }`;
+      } else {
+        noticeEl.classList.add('hidden');
+      }
+
+      const activePlayer = state.players[state.currentPlayerIndex];
+      if (actionContext && actionContext.type === 'buy' && isBuyable && state.properties[tile.id].ownerId === null) {
+        const canAfford = activePlayer.money >= tile.price;
+        const buyBtn = document.createElement('button');
+        buyBtn.className = 'hist-btn btn-turquoise flex-1 py-3 px-4 rounded-lg font-historic font-bold text-sm';
+        buyBtn.disabled = !canAfford;
+        buyBtn.textContent = canAfford ? `КУПИТЬ ЗА ${tile.price} $` : `НЕ ХВАТАЕТ ДЕНЕГ (${tile.price} $)`;
+        buyBtn.onclick = () => purchaseTile(tile.id);
+        btnsEl.appendChild(buyBtn);
+
+        const auctionBtn = document.createElement('button');
+        auctionBtn.className = 'hist-btn btn-gold py-3 px-4 rounded-lg font-historic font-bold text-xs sm:text-sm';
+        auctionBtn.textContent = '🔨 На аукцион (с 10 $)';
+        auctionBtn.onclick = () => {
+          closeCityModal();
+          startAuction(tile.id);
+        };
+        btnsEl.appendChild(auctionBtn);
+      } else {
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'hist-btn btn-gold w-full py-3 rounded-lg font-historic font-bold text-sm';
+        closeBtn.textContent = 'ЗАКРЫТЬ КАРТОЧКУ';
+        closeBtn.onclick = closeCityModal;
+        btnsEl.appendChild(closeBtn);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCityModal() {
+      sfx.click();
+      document.getElementById('cityModal').classList.add('hidden');
+    }
+
+    function purchaseTile(tileId) {
+      const tile = BOARD_TILES[tileId];
+      const player = state.players[state.currentPlayerIndex];
+      const prop = state.properties[tileId];
+
+      if (prop.ownerId !== null || player.money < tile.price) return;
+
+      changeMoney(player, -tile.price);
+      prop.ownerId = player.id;
+      addLog(`${player.name} купил «${tile.name}» за ${tile.price} $!`, 'text-[#6ec2bc]');
+      setStatus(`${player.name} приобрёл «${tile.name}»!`);
+
+      closeCityModal();
+      updateAllUI();
+    }
+
+    /* ==========================================================================
+       10. АУКЦИОН БАНКИРА (ОФИЦИАЛЬНОЕ ПРАВИЛО: СТАРТ С 10 $, ШАГ ОТ +1 $)
+       ========================================================================== */
+    function startAuction(tileId) {
+      const activePlayers = state.players.filter(p => !p.bankrupt && p.money >= 10);
+      const tile = BOARD_TILES[tileId];
+
+      if (activePlayers.length === 0) {
+        addLog(`На аукционе за «${tile.name}» не нашлось покупателей со стартовой суммой 10 $.`, 'text-[#a8947a]');
+        return;
+      }
+
+      sfx.scrollOpen();
+      auctionState = {
+        active: true,
+        tileId,
+        currentBid: 10,
+        leaderId: null,
+        activeBidders: activePlayers.map(p => p.id),
+        turnIndex: 0
+      };
+
+      addLog(`🔨 Банкир открыл аукцион на «${tile.name}»! Стартовая цена: 10 $.`, 'text-[#e2be6b]');
+      renderAuctionModal();
+      document.getElementById('auctionModal').classList.remove('hidden');
+    }
+
+    function renderAuctionModal() {
+      const tile = BOARD_TILES[auctionState.tileId];
+      document.getElementById('auctionTileName').textContent = tile.name;
+      document.getElementById('auctionTileMeta').textContent = `Номинал в Банке: ${tile.price} $`;
+      document.getElementById('auctionCurrentBid').textContent = `${auctionState.currentBid} $`;
+
+      if (auctionState.leaderId !== null) {
+        const leader = state.players[auctionState.leaderId];
+        document.getElementById('auctionLeaderName').textContent = `Лидирует: ${leader.name}`;
+      } else {
+        document.getElementById('auctionLeaderName').textContent = 'Ставок пока нет (минимум 10 $)';
+      }
+
+      const bidderId = auctionState.activeBidders[auctionState.turnIndex];
+      const bidder = state.players[bidderId];
+      document.getElementById('auctionBidderTurn').textContent = `Ход торгов: ${bidder.name} (баланс: ${bidder.money} $)`;
+    }
+
+    function placeAuctionBid(increment) {
+      if (!auctionState.active) return;
+      const bidderId = auctionState.activeBidders[auctionState.turnIndex];
+      const bidder = state.players[bidderId];
+
+      const newBid = auctionState.leaderId === null ? 10 : auctionState.currentBid + increment;
+      if (bidder.money < newBid) {
+        setStatus(`${bidder.name}: недостаточно денег для ставки ${newBid} $!`);
+        return;
+      }
+
+      sfx.coinGain();
+      auctionState.currentBid = newBid;
+      auctionState.leaderId = bidderId;
+
+      if (auctionState.activeBidders.length === 1) {
+        finishAuction();
+        return;
+      }
+
+      auctionState.turnIndex = (auctionState.turnIndex + 1) % auctionState.activeBidders.length;
+      renderAuctionModal();
+    }
+
+    function passAuctionTurn() {
+      if (!auctionState.active) return;
+      sfx.click();
+
+      auctionState.activeBidders.splice(auctionState.turnIndex, 1);
+
+      if (auctionState.activeBidders.length === 0) {
+        finishAuction();
+        return;
+      }
+
+      if (auctionState.activeBidders.length === 1 && auctionState.leaderId === auctionState.activeBidders[0]) {
+        finishAuction();
+        return;
+      }
+
+      auctionState.turnIndex = auctionState.turnIndex % auctionState.activeBidders.length;
+      renderAuctionModal();
+    }
+
+    function finishAuction() {
+      const tile = BOARD_TILES[auctionState.tileId];
+      document.getElementById('auctionModal').classList.add('hidden');
+      auctionState.active = false;
+
+      if (auctionState.leaderId !== null) {
+        const winner = state.players[auctionState.leaderId];
+        changeMoney(winner, -auctionState.currentBid);
+        state.properties[tile.id].ownerId = winner.id;
+        addLog(`🏆 ${winner.name} выиграл аукцион на «${tile.name}» за ${auctionState.currentBid} $!`, 'text-[#6ec2bc]');
+        setStatus(`${winner.name} купил «${tile.name}» на аукционе за ${auctionState.currentBid} $!`);
+      } else {
+        addLog(`Аукцион на «${tile.name}» завершён без покупателей.`, 'text-[#a8947a]');
+      }
+      updateAllUI();
+    }
+
+    /* ==========================================================================
+       11. СДЕЛКИ И ОБМЕН МЕЖДУ ИГРОКАМИ (В ЛЮБОЙ МОМЕНТ ИГРЫ)
+       ========================================================================== */
+    function openTradeModal() {
+      const me = state.players[state.currentPlayerIndex];
+      const partners = state.players.filter(p => !p.bankrupt && p.id !== me.id);
+      if (partners.length === 0) return;
+
+      sfx.click();
+      const select = document.getElementById('tradePartnerSelect');
+      select.innerHTML = '';
+      partners.forEach(pt => {
+        const opt = document.createElement('option');
+        opt.value = pt.id;
+        opt.textContent = `${pt.name} (${pt.money} $)`;
+        select.appendChild(opt);
+      });
+
+      document.getElementById('tradeMyCash').value = 0;
+      document.getElementById('tradePartnerCash').value = 0;
+      renderTradeLists();
+      document.getElementById('tradeModal').classList.remove('hidden');
+    }
+
+    function closeTradeModal() {
+      sfx.click();
+      document.getElementById('tradeModal').classList.add('hidden');
+      if (state.pendingDebt) {
+        openRescueModal();
+      } else {
+        updateAllUI();
+      }
+    }
+
+    function renderTradeLists() {
+      const me = state.players[state.currentPlayerIndex];
+      const partnerId = parseInt(document.getElementById('tradePartnerSelect').value, 10);
+      const partner = state.players[partnerId];
+      if (!partner) return;
+
+      document.getElementById('tradeMyTitle').textContent = `Предлагает ${me.name} (баланс: ${me.money} $)`;
+      document.getElementById('tradePartnerTitle').textContent = `Отдаёт ${partner.name} (баланс: ${partner.money} $)`;
+
+      const myJailLbl = document.getElementById('tradeMyJailLabel');
+      const myJailChk = document.getElementById('tradeMyJailCheck');
+      myJailChk.checked = false;
+      if (me.jailCards > 0) myJailLbl.classList.remove('hidden');
+      else myJailLbl.classList.add('hidden');
+
+      const ptJailLbl = document.getElementById('tradePartnerJailLabel');
+      const ptJailChk = document.getElementById('tradePartnerJailCheck');
+      ptJailChk.checked = false;
+      if (partner.jailCards > 0) ptJailLbl.classList.remove('hidden');
+      else ptJailLbl.classList.add('hidden');
+
+      renderPlayerTradableProps(me.id, 'tradeMyPropsList', 'my-trade-prop');
+      renderPlayerTradableProps(partner.id, 'tradePartnerPropsList', 'pt-trade-prop');
+    }
+
+    function renderPlayerTradableProps(playerId, containerId, inputName) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      const owned = BOARD_TILES.filter(t => state.properties[t.id] && state.properties[t.id].ownerId === playerId);
+      if (owned.length === 0) {
+        container.innerHTML = '<div class="text-[#5a4634] italic">Нет собственности</div>';
+        return;
+      }
+
+      owned.forEach(tile => {
+        const prop = state.properties[tile.id];
+        const blockedByBuildings = tile.type === 'city' && groupHasAnyBuildings(tile.group);
+        const label = document.createElement('label');
+        label.className = `flex items-center gap-1.5 p-1 rounded border border-[#8a6424]/30 bg-[#f7efe0] ${blockedByBuildings ? 'opacity-50' : 'cursor-pointer'}`;
+        label.innerHTML = `
+          <input type="checkbox" name="${inputName}" value="${tile.id}" ${blockedByBuildings ? 'disabled' : ''}>
+          <span class="w-2.5 h-2.5 rounded-xs shrink-0" style="background:${tile.color || '#2a7b76'}"></span>
+          <span class="font-semibold text-[#231911] truncate">${tile.name}</span>
+          ${prop.mortgaged ? '<span class="text-[10px] text-[#8f2d28] font-bold">[ЗАЛОГ]</span>' : ''}
+          ${blockedByBuildings ? '<span class="text-[10px] text-[#8f2d28]">(есть здания)</span>' : ''}
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function executeTrade() {
+      const me = state.players[state.currentPlayerIndex];
+      const partnerId = parseInt(document.getElementById('tradePartnerSelect').value, 10);
+      const partner = state.players[partnerId];
+
+      const myCash = Math.max(0, parseInt(document.getElementById('tradeMyCash').value, 10) || 0);
+      const ptCash = Math.max(0, parseInt(document.getElementById('tradePartnerCash').value, 10) || 0);
+
+      if (myCash > me.money || ptCash > partner.money) {
+        setStatus('У одного из участников сделки недостаточно денег!');
+        return;
+      }
+
+      const myPropIds = Array.from(document.querySelectorAll('input[name="my-trade-prop"]:checked')).map(el => parseInt(el.value, 10));
+      const ptPropIds = Array.from(document.querySelectorAll('input[name="pt-trade-prop"]:checked')).map(el => parseInt(el.value, 10));
+      const giveJail = document.getElementById('tradeMyJailCheck').checked && me.jailCards > 0;
+      const takeJail = document.getElementById('tradePartnerJailCheck').checked && partner.jailCards > 0;
+
+      if (myCash === 0 && ptCash === 0 && myPropIds.length === 0 && ptPropIds.length === 0 && !giveJail && !takeJail) {
+        setStatus('Выберите хотя бы один предмет или сумму для обмена.');
+        return;
+      }
+
+      // Перевод денег
+      if (myCash > 0) {
+        changeMoney(me, -myCash);
+        changeMoney(partner, myCash);
+      }
+      if (ptCash > 0) {
+        changeMoney(partner, -ptCash);
+        changeMoney(me, ptCash);
+      }
+
+      // Перевод карт свободы
+      if (giveJail) { me.jailCards--; partner.jailCards++; }
+      if (takeJail) { partner.jailCards--; me.jailCards++; }
+
+      // Передача собственности + правило 10% за заложенную недвижимость при смене владельца
+      myPropIds.forEach(id => {
+        state.properties[id].ownerId = partner.id;
+        if (state.properties[id].mortgaged) {
+          const fee = Math.ceil((BOARD_TILES[id].price / 2) * 0.1);
+          changeMoney(partner, -fee);
+          addLog(`${partner.name} уплатил в Банк 10% (${fee} $) за заложенную улицу «${BOARD_TILES[id].name}».`);
+        }
+      });
+
+      ptPropIds.forEach(id => {
+        state.properties[id].ownerId = me.id;
+        if (state.properties[id].mortgaged) {
+          const fee = Math.ceil((BOARD_TILES[id].price / 2) * 0.1);
+          changeMoney(me, -fee);
+          addLog(`${me.name} уплатил в Банк 10% (${fee} $) за заложенную улицу «${BOARD_TILES[id].name}».`);
+        }
+      });
+
+      sfx.coinGain();
+      addLog(`🤝 Заключена сделка между ${me.name} и ${partner.name}!`, 'text-[#6ec2bc]');
+      closeTradeModal();
+    }
+
+    /* ==========================================================================
+       12. КАРТОЧКИ «ШАНС» И «МИРОВОЙ ФОНД»
+       ========================================================================== */
+    let pendingCardCallback = null;
+
+    function showAndExecuteEventCard(player, deckTitle, card) {
+      return new Promise(resolve => {
+        sfx.scrollOpen();
+        document.getElementById('eventCardIcon').textContent = card.icon;
+        document.getElementById('eventCardDeck').textContent = deckTitle;
+        document.getElementById('eventCardTitle').textContent = card.title;
+        document.getElementById('eventCardDesc').textContent = card.desc;
+        document.getElementById('eventCardModal').classList.remove('hidden');
+
+        pendingCardCallback = async () => {
+          document.getElementById('eventCardModal').classList.add('hidden');
+          addLog(`${deckTitle}: ${player.name} — «${card.title}».`, 'text-[#e2be6b]');
+
+          if (card.action === 'money') {
+            if (card.value >= 0) changeMoney(player, card.value);
+            else requestPayment(player, null, Math.abs(card.value), card.title);
+          } else if (card.action === 'jailCard') {
+            player.jailCards++;
+          } else if (card.action === 'jail') {
+            sendPlayerToJail(player);
+          } else if (card.action === 'move') {
+            const dist = (card.target - player.position + 40) % 40;
+            if (dist > 0) await movePlayerSteps(player, dist);
+          } else if (card.action === 'moveRel') {
+            await movePlayerSteps(player, card.offset);
+          } else if (card.action === 'payAll') {
+            const activeOthers = state.players.filter(o => o.id !== player.id && !o.bankrupt);
+            const totalPay = activeOthers.length * card.value;
+            if (player.money >= totalPay) {
+              activeOthers.forEach(other => {
+                changeMoney(player, -card.value);
+                changeMoney(other, card.value);
+              });
+            } else {
+              requestPayment(player, null, totalPay, card.title);
+            }
+          } else if (card.action === 'collectAll') {
+            state.players.forEach(other => {
+              if (other.id !== player.id && !other.bankrupt) {
+                const pay = Math.min(other.money, card.value);
+                changeMoney(other, -pay);
+                changeMoney(player, pay);
+              }
+            });
+          } else if (card.action === 'repairs') {
+            let totalCost = 0;
+            Object.values(state.properties).forEach(pr => {
+              if (pr.ownerId === player.id) {
+                if (pr.houses === 5) totalCost += card.hotelCost;
+                else totalCost += pr.houses * card.houseCost;
+              }
+            });
+            if (totalCost > 0) requestPayment(player, null, totalCost, card.title);
+          }
+
+          updateAllUI();
+          resolve();
+        };
+      });
+    }
+
+    function closeEventCardModal() {
+      sfx.click();
+      if (pendingCardCallback) {
+        const fn = pendingCardCallback;
+        pendingCardCallback = null;
+        fn();
+      } else {
+        document.getElementById('eventCardModal').classList.add('hidden');
+      }
+    }
+
+    /* ==========================================================================
+       13. ТЮРЬМА, ДЕНЬГИ, ДОЛГИ И БАНКРОТСТВО (ОФИЦИАЛЬНЫЕ ПРАВИЛА)
+       ========================================================================== */
+    function sendPlayerToJail(player) {
+      sfx.jail();
+      player.position = 10;
+      player.inJail = true;
+      player.jailTurns = 0;
+      state.doublesCount = 0;
+      renderBoardState();
+    }
+
+    function handlePayBail() {
+      const p = state.players[state.currentPlayerIndex];
+      if (!p.inJail || p.money < 50) return;
+      changeMoney(p, -50);
+      p.inJail = false;
+      p.jailTurns = 0;
+      addLog(`${p.name} заплатил 50 $ и вышел из Тюрьмы.`, 'text-[#6ec2bc]');
+      setStatus(`${p.name} вышел из Тюрьмы! Бросайте кубики.`);
+      updateAllUI();
+    }
+
+    function handleUseJailCard() {
+      const p = state.players[state.currentPlayerIndex];
+      if (!p.inJail || p.jailCards <= 0) return;
+      p.jailCards--;
+      p.inJail = false;
+      p.jailTurns = 0;
+      sfx.scrollOpen();
+      addLog(`${p.name} использовал карточку «Выйти из тюрьмы бесплатно»!`, 'text-[#6ec2bc]');
+      setStatus(`${p.name} на свободе! Бросайте кубики.`);
+      updateAllUI();
+    }
+
+    function changeMoney(player, delta) {
+      if (player.bankrupt) return;
+      player.money += delta;
+
+      if (delta > 0) {
+        sfx.coinGain();
+        spawnFloatingMoney(`+${delta} $`, '#6ec2bc');
+      } else if (delta < 0) {
+        sfx.coinLoss();
+        spawnFloatingMoney(`${delta} $`, '#e06c65');
+      }
+      renderPlayersHUD();
+    }
+
+    function requestPayment(debtor, creditor, amount, reason) {
+      if (debtor.money >= amount) {
+        changeMoney(debtor, -amount);
+        if (creditor) changeMoney(creditor, amount);
+        return true;
+      }
+
+      // Не хватает денег -> включаем антикризисный режим «На помощь! Я не могу заплатить!»
+      state.pendingDebt = {
+        debtorId: debtor.id,
+        creditorId: creditor ? creditor.id : null,
+        amount,
+        reason
+      };
+      openRescueModal();
+      updateAllUI();
+      return false;
+    }
+
+    function openRescueModal() {
+      if (!state.pendingDebt) return;
+      const debt = state.pendingDebt;
+      const debtor = state.players[debt.debtorId];
+      const creditorName = debt.creditorId !== null ? state.players[debt.creditorId].name : 'Банку';
+
+      document.getElementById('rescueInfoText').textContent =
+        `${debtor.name} должен выплатить ${debt.amount} $ (${creditorName}) за «${debt.reason}», но на счёте только ${debtor.money} $. Продайте здания за полцены, заложите улицы или заключите сделку!`;
+
+      const settleBtn = document.getElementById('settleDebtBtn');
+      if (debtor.money >= debt.amount) {
+        settleBtn.classList.remove('hidden');
+        settleBtn.textContent = `✅ Оплатить ${debt.amount} $ и продолжить!`;
+      } else {
+        settleBtn.classList.add('hidden');
+      }
+
+      document.getElementById('rescueModal').classList.remove('hidden');
+    }
+
+    function openPortfolioModalFromRescue() {
+      document.getElementById('rescueModal').classList.add('hidden');
+      openPortfolioModal();
+    }
+
+    function openTradeModalFromRescue() {
+      document.getElementById('rescueModal').classList.add('hidden');
+      openTradeModal();
+    }
+
+    function confirmSettleDebt() {
+      if (!state.pendingDebt) return;
+      const debt = state.pendingDebt;
+      const debtor = state.players[debt.debtorId];
+      if (debtor.money < debt.amount) return;
+
+      changeMoney(debtor, -debt.amount);
+      if (debt.creditorId !== null) {
+        changeMoney(state.players[debt.creditorId], debt.amount);
+      }
+      addLog(`✅ ${debtor.name} собрал средства и погасил долг ${debt.amount} $!`, 'text-[#6ec2bc]');
+      state.pendingDebt = null;
+      document.getElementById('rescueModal').classList.add('hidden');
+      updateAllUI();
+    }
+
+    function declareBankruptcyFromRescue() {
+      if (!state.pendingDebt) return;
+      const debt = state.pendingDebt;
+      const debtor = state.players[debt.debtorId];
+      const creditor = debt.creditorId !== null ? state.players[debt.creditorId] : null;
+
+      state.pendingDebt = null;
+      document.getElementById('rescueModal').classList.add('hidden');
+      handleBankruptcy(debtor, creditor);
+      updateAllUI();
+    }
+
+    function spawnFloatingMoney(text, color) {
+      const el = document.createElement('div');
+      el.className = 'money-float';
+      el.textContent = text;
+      el.style.color = color;
+      el.style.left = '50%';
+      el.style.top = '45%';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    function handleBankruptcy(player, creditor = null) {
+      player.bankrupt = true;
+      const leftoverCash = Math.max(0, player.money);
+      player.money = 0;
+
+      // Сначала возвращаем все здания в Банк
+      Object.keys(state.properties).forEach(tileId => {
+        const pr = state.properties[tileId];
+        if (pr.ownerId === player.id && pr.houses > 0) {
+          if (pr.houses === 5) state.bankHotels++;
+          else state.bankHouses += pr.houses;
+          pr.houses = 0;
+        }
+      });
+
+      if (creditor && !creditor.bankrupt) {
+        // Остался должен другому игроку: передаём деньги, карточки выхода из тюрьмы и собственность
+        if (leftoverCash > 0) changeMoney(creditor, leftoverCash);
+        creditor.jailCards += player.jailCards;
+        player.jailCards = 0;
+
+        Object.keys(state.properties).forEach(tileId => {
+          const pr = state.properties[tileId];
+          if (pr.ownerId === player.id) {
+            pr.ownerId = creditor.id;
+            if (pr.mortgaged) {
+              const fee = Math.ceil((BOARD_TILES[tileId].price / 2) * 0.1);
+              changeMoney(creditor, -fee);
+            }
+          }
+        });
+        addLog(`💥 ${player.name} обанкротился! Все активы перешли игроку ${creditor.name}.`, 'text-[#e06c65]');
+      } else {
+        // Остался должен Банку: собственность освобождается от залога
+        player.jailCards = 0;
+        Object.keys(state.properties).forEach(tileId => {
+          const pr = state.properties[tileId];
+          if (pr.ownerId === player.id) {
+            pr.ownerId = null;
+            pr.houses = 0;
+            pr.mortgaged = false;
+          }
+        });
+        addLog(`💥 ${player.name} обанкротился! Вся его собственность возвращена в Банк.`, 'text-[#e06c65]');
+      }
+
+      const activePlayers = state.players.filter(pl => !pl.bankrupt);
+      if (activePlayers.length === 1) {
+        state.gameOver = true;
+        sfx.victory();
+        const winner = activePlayers[0];
+        document.getElementById('winnerName').textContent = winner.name;
+        document.getElementById('winnerStats').textContent = `Итоговый капитал: ${winner.money} $`;
+        document.getElementById('victoryModal').classList.remove('hidden');
+      } else if (state.currentPlayerIndex === player.id) {
+        state.hasRolled = true;
+        endTurn();
+      }
+    }
+
+    /* ==========================================================================
+       14. УПРАВЛЕНИЕ АКТИВАМИ: РАВНОМЕРНЫЕ ДОМА/ОТЕЛИ (32/12) И ЗАЛОГ
+       ========================================================================== */
+    function openPortfolioModal() {
+      sfx.click();
+      renderPortfolioList();
+      document.getElementById('portfolioModal').classList.remove('hidden');
+    }
+
+    function closePortfolioModal() {
+      sfx.click();
+      document.getElementById('portfolioModal').classList.add('hidden');
+      if (state.pendingDebt) {
+        openRescueModal();
+      } else {
+        updateAllUI();
+      }
+    }
+
+    function canBuildEvenly(tile) {
+      const prop = state.properties[tile.id];
+      if (tile.type !== 'city') return false;
+      if (!playerOwnsGroup(prop.ownerId, tile.group)) return false;
+      if (groupHasAnyMortgage(tile.group)) return false;
+      if (prop.houses >= 5) return false;
+
+      // Проверяем лимит Банка (32 дома, 12 отелей)
+      if (prop.houses < 4 && state.bankHouses <= 0) return false;
+      if (prop.houses === 4 && state.bankHotels <= 0) return false;
+
+      // Правило равномерной застройки: нельзя строить, если на этой улице уже больше домов, чем на другой в группе
+      const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === tile.group);
+      const minHouses = Math.min(...groupTiles.map(t => state.properties[t.id].houses));
+      return prop.houses === minHouses;
+    }
+
+    function canSellEvenly(tile) {
+      const prop = state.properties[tile.id];
+      if (tile.type !== 'city' || prop.houses <= 0) return false;
+      // При продаже отеля в Банке должно быть минимум 4 дома на замену
+      if (prop.houses === 5 && state.bankHouses < 4) return false;
+
+      // Правило равномерной продажи
+      const groupTiles = BOARD_TILES.filter(t => t.type === 'city' && t.group === tile.group);
+      const maxHouses = Math.max(...groupTiles.map(t => state.properties[t.id].houses));
+      return prop.houses === maxHouses;
+    }
+
+    function renderPortfolioList() {
+      const list = document.getElementById('portfolioList');
+      const player = state.players[state.currentPlayerIndex];
+      document.getElementById('bankSupplyBadge').textContent = `В Банке осталось: ${state.bankHouses} Домов • ${state.bankHotels} Отелей`;
+      list.innerHTML = '';
+
+      const ownedTiles = BOARD_TILES.filter(t => state.properties[t.id] && state.properties[t.id].ownerId === player.id);
+
+      if (ownedTiles.length === 0) {
+        list.innerHTML = `<div class="text-center text-[#5a4634] py-8 text-sm">У игрока ${player.name} пока нет собственности.</div>`;
+        return;
+      }
+
+      ownedTiles.forEach(tile => {
+        const prop = state.properties[tile.id];
+        const isMonopoly = tile.type === 'city' && playerOwnsGroup(player.id, tile.group);
+        const canBuild = canBuildEvenly(tile) && player.money >= tile.buildCost;
+        const canSellHouse = canSellEvenly(tile);
+        const canMortgage = !prop.mortgaged && (tile.type !== 'city' || !groupHasAnyBuildings(tile.group));
+        const mortgageVal = Math.floor(tile.price / 2);
+        const unmortgageCost = Math.ceil(mortgageVal * 1.1);
+
+        const levelText = tile.type === 'city'
+          ? (prop.houses === 5 ? '🏨 Отель' : `🏠 Домов: ${prop.houses}/4`)
+          : (tile.type === 'railroad' ? '🚂 Станция' : '⚡ Коммунальное предприятие');
+
+        const buildLabel = prop.houses === 4 ? `Построить Отель (${tile.buildCost} $)` : `+ Дом (${tile.buildCost} $)`;
+
+        const row = document.createElement('div');
+        row.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-[#e6d1a7] border border-[#8a6424]/60 text-[#231911]';
+
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <div class="w-3.5 h-10 rounded-xs shrink-0 border border-[#231911]/30" style="background:${tile.color || '#2a7b76'}"></div>
+            <div>
+              <div class="font-historic font-bold text-base flex items-center gap-1.5">
+                <span>${tile.name}</span>
+                ${isMonopoly ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#2a7b76] text-[#f5ebd6]">МОНОПОЛИЯ ×2</span>' : ''}
+                ${prop.mortgaged ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#8f2d28] text-[#f5ebd6]">ЗАЛОЖЕНО</span>' : ''}
+              </div>
+              <div class="text-xs text-[#5a4634]">${tile.country} • ${levelText}</div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            ${tile.type === 'city' ? `
+              <button onclick="buildHouse(${tile.id})" ${!canBuild ? 'disabled' : ''}
+                class="hist-btn btn-turquoise px-2.5 py-1.5 rounded text-xs font-bold">
+                ${buildLabel}
+              </button>
+              <button onclick="sellHouse(${tile.id})" ${!canSellHouse ? 'disabled' : ''}
+                class="hist-btn btn-bronze-outline px-2.5 py-1.5 rounded text-xs font-semibold">
+                - Продать (+${Math.floor(tile.buildCost / 2)} $)
+              </button>
+            ` : ''}
+            ${!prop.mortgaged ? `
+              <button onclick="toggleMortgage(${tile.id})" ${!canMortgage ? 'disabled' : ''}
+                class="hist-btn btn-gold px-2.5 py-1.5 rounded text-xs font-bold">
+                Заложить (+${mortgageVal} $)
+              </button>
+            ` : `
+              <button onclick="toggleMortgage(${tile.id})" ${player.money < unmortgageCost ? 'disabled' : ''}
+                class="hist-btn btn-turquoise px-2.5 py-1.5 rounded text-xs font-bold">
+                Выкупить (-${unmortgageCost} $)
+              </button>
+            `}
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function buildHouse(tileId) {
+      const tile = BOARD_TILES[tileId];
+      const prop = state.properties[tileId];
+      const player = state.players[state.currentPlayerIndex];
+
+      if (!canBuildEvenly(tile) || player.money < tile.buildCost) return;
+
+      changeMoney(player, -tile.buildCost);
+      if (prop.houses === 4) {
+        // Обмен 4 домов на 1 отель
+        state.bankHouses += 4;
+        state.bankHotels -= 1;
+        prop.houses = 5;
+        addLog(`🏨 ${player.name} обменял 4 Дома на Отель в городе ${tile.name}!`, 'text-[#6ec2bc]');
+      } else {
+        state.bankHouses -= 1;
+        prop.houses++;
+        addLog(`🏠 ${player.name} построил Дом (${prop.houses}/4) в городе ${tile.name}!`, 'text-[#6ec2bc]');
+      }
+      renderPortfolioList();
+      renderBoardState();
+    }
+
+    function sellHouse(tileId) {
+      const tile = BOARD_TILES[tileId];
+      const prop = state.properties[tileId];
+      const player = state.players[state.currentPlayerIndex];
+      if (!canSellEvenly(tile)) return;
+
+      if (prop.houses === 5) {
+        state.bankHotels += 1;
+        state.bankHouses -= 4;
+        prop.houses = 4;
+        addLog(`${player.name} продал Отель Банку в городе ${tile.name} и получил 4 Дома взамен.`);
+      } else {
+        state.bankHouses += 1;
+        prop.houses--;
+        addLog(`${player.name} продал Дом Банку в городе ${tile.name}.`);
+      }
+      changeMoney(player, Math.floor(tile.buildCost / 2));
+      renderPortfolioList();
+      renderBoardState();
+    }
+
+    function toggleMortgage(tileId) {
+      const tile = BOARD_TILES[tileId];
+      const prop = state.properties[tileId];
+      const player = state.players[state.currentPlayerIndex];
+      if (tile.type === 'city' && groupHasAnyBuildings(tile.group)) return;
+
+      const mortgageVal = Math.floor(tile.price / 2);
+      const unmortgageCost = Math.ceil(mortgageVal * 1.1);
+
+      if (!prop.mortgaged) {
+        prop.mortgaged = true;
+        changeMoney(player, mortgageVal);
+        addLog(`${player.name} заложил «${tile.name}» за ${mortgageVal} $.`, 'text-[#e2be6b]');
+      } else {
+        if (player.money < unmortgageCost) return;
+        prop.mortgaged = false;
+        changeMoney(player, -unmortgageCost);
+        addLog(`${player.name} выкупил «${tile.name}» из залога за ${unmortgageCost} $.`, 'text-[#6ec2bc]');
+      }
+      renderPortfolioList();
+      renderBoardState();
+    }
+
+    /* ==========================================================================
+       15. ПЕРЕХОД ХОДА И ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+       ========================================================================== */
+    function endTurn() {
+      if (state.isAnimating || state.gameOver || state.pendingDebt) return;
+      sfx.click();
+
+      state.hasRolled = false;
+      state.doublesCount = 0;
+
+      let nextIdx = state.currentPlayerIndex;
+      for (let i = 0; i < state.players.length; i++) {
+        nextIdx = (nextIdx + 1) % state.players.length;
+        if (!state.players[nextIdx].bankrupt) break;
+      }
+      state.currentPlayerIndex = nextIdx;
+
+      const nextPlayer = state.players[nextIdx];
+      setStatus(`Ходит ${nextPlayer.name}. Бросайте кубики!`);
+      addLog(`--- Ход переходит к игроку ${nextPlayer.name} ---`, 'text-[#a8947a]');
+      updateAllUI();
+    }
+
+    function toggleSound() {
+      sfx.enabled = !sfx.enabled;
+      const btn = document.getElementById('soundToggleBtn');
+      btn.textContent = sfx.enabled ? '🔊' : '🔇';
+      if (sfx.enabled) sfx.click();
+    }
+
+    function setStatus(text) {
+      document.getElementById('statusMessage').textContent = text;
+    }
+
+    function addLog(text, colorClass = 'text-[#dfd0b8]') {
+      const log = document.getElementById('gameLog');
+      const item = document.createElement('div');
+      item.className = colorClass;
+      item.textContent = text;
+      log.prepend(item);
+    }
+
+    function openRulesModal() {
+      sfx.click();
+      document.getElementById('rulesModal').classList.remove('hidden');
+    }
+
+    function closeRulesModal() {
+      sfx.click();
+      document.getElementById('rulesModal').classList.add('hidden');
+    }
+
+    function confirmRestart() {
+      sfx.click();
+      document.getElementById('setupScreen').classList.remove('hidden');
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    window.addEventListener('resize', resizeBoardToFit);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeBoardToFit, 120);
+      setTimeout(resizeBoardToFit, 350);
+    });
+
+    window.onload = function () {
+      initSetupUI();
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => resizeBoardToFit());
+        const bc = document.getElementById('boardContainer');
+        if (bc) ro.observe(bc);
+      }
+    };
+  </script>
+</body>
+</html>

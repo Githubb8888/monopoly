@@ -170,15 +170,15 @@
         flex-direction: row;
         align-items: stretch;
         padding: 6px;
-        gap: 6px;
+        gap: 5px;
       }
       #boardContainer {
         flex: 1 1 auto;
-        width: auto;
+        width: 90%;
         height: 100%;
       }
       #sideControlPanel {
-        flex: 0 0 clamp(220px, 36vw, 360px);
+        flex: 0 0 clamp(220px, 10vw, 300px);
         height: 100%;
       }
     }
@@ -235,7 +235,7 @@
     /* Цветная полоса региона города */
     .color-bar {
       width: 100%;
-      height: 24%;
+      height: 15%;
       min-height: 7px;
       display: flex;
       align-items: center;
@@ -316,26 +316,25 @@
       inset: 0;
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      gap: 2px;
+      gap: 5px;
       pointer-events: none;
       z-index: 10;
-      padding: 2px;
+      padding: 5px;
     }
 
     .player-token {
-      width: clamp(15px, 2.3vmin, 28px);
-      height: clamp(15px, 2.3vmin, 28px);
+      width: clamp(10px, 2.3vmin, 10px);
+      height: clamp(10px, 2.3vmin, 10px);
       border-radius: 50%;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: flex-start;
       font-size: clamp(9px, 1.35vmin, 16px);
       background: #1b1510;
       color: #f5ebd6;
       border: 2px solid var(--p-color);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
       transition: transform 0.25s ease;
       overflow: hidden;
     }
@@ -349,7 +348,6 @@
     .player-token.active-turn {
       transform: scale(1.22);
       z-index: 15;
-      box-shadow: 0 0 0 2px #fff8ea, 0 4px 10px rgba(0, 0, 0, 0.85);
     }
 
     /* Центральная область поля — светлая классическая столешница Монополии */
@@ -439,14 +437,177 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: rgba(18, 15, 12, 0.4); }
     ::-webkit-scrollbar-thumb { background: rgba(197, 155, 67, 0.45); border-radius: 4px; }
+
+  /* Компактный интерфейс БЕЗ СКРОЛЛА только для телефонов */
+@media (max-width: 639px), (orientation: landscape) and (max-height: 500px) {
+  #setupScreen {
+    align-items: center !important;
+    padding: 4px !important;
+    overflow: hidden !important;
+  }
+
+  #setupScreen > .parchment-card {
+    padding: 8px 12px !important;
+    max-width: 98vw !important;
+  }
+
+  #setupScreen h1 {
+    font-size: 1.05rem !important;
+    line-height: 1.1 !important;
+  }
+
+  @media (orientation: landscape) and (max-height: 500px) {
+    #setupScreen p,
+    #setupScreen .inline-flex {
+      display: none !important;
+    }
+
+    #setupScreen .border-b {
+      padding-bottom: 4px !important;
+      margin-bottom: 6px !important;
+    }
+
+    #modeOnlineBtn,
+    #modeLocalBtn {
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+      font-size: 11px !important;
+    }
+
+    #localLobbyBlock .mb-5 {
+      margin-bottom: 6px !important;
+    }
+
+    #countSelector button {
+      padding-top: 3px !important;
+      padding-bottom: 3px !important;
+      font-size: 12px !important;
+    }
+
+    #playersSetupList {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      max-height: none !important;
+      margin-bottom: 6px !important;
+    }
+
+    #playersSetupList > div {
+      padding: 4px 6px !important;
+      gap: 6px !important;
+    }
+
+    #playersSetupList button {
+      width: 28px !important;
+      height: 28px !important;
+    }
+
+    #playersSetupList input {
+      font-size: 11px !important;
+      padding: 0 !important;
+    }
+
+    #localLobbyBlock > button {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      font-size: 12px !important;
+      margin-bottom: 4px !important;
+    }
+
+    #setupScreen > .parchment-card > .border-t {
+      padding-top: 4px !important;
+    }
+
+    #setupScreen > .parchment-card > .border-t button {
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+      font-size: 11px !important;
+    }
+
+    /* Компактная карточка города (#cityModal) на горизонтальном телефоне */
+    #cityModal > .parchment-card {
+      max-height: 94dvh !important;
+      display: flex !important;
+      flex-direction: column !important;
+      max-width: 540px !important;
+    }
+
+    #modalBannerContainer {
+      height: 50px !important;
+      flex-shrink: 0 !important;
+    }
+
+    #modalCityName {
+      font-size: 1.25rem !important;
+    }
+
+    #cityModal .p-4.sm\:p-5 {
+      padding: 8px 12px !important;
+      gap: 6px !important;
+      max-height: none !important;
+      flex: 1 1 auto !important;
+      overflow-y: auto !important;
+    }
+
+    /* Остальные модальные окна (Правила, Активы, Аукцион) */
+    #portfolioModal > .parchment-card,
+    #rulesModal > .parchment-card,
+    #auctionModal > .parchment-card,
+    #eventCardModal > .parchment-card,
+    #rescueModal > .parchment-card {
+      max-height: 94dvh !important;
+      padding: 10px 14px !important;
+      overflow-y: auto !important;
+    }
+
+    /* Имя игрока в правой верхней шапке */
+    #sideControlPanel > .obsidian-panel:first-child {
+      padding: 4px 6px !important;
+    }
+    #sideControlPanel > .obsidian-panel:first-child button {
+      padding: 2px 5px !important;
+      font-size: 11px !important;
+    }
+  }
+  /* Раскладка 80/20 без пустых отступов на горизонтальном телефоне */
+    #gameScreen {
+      padding: 10px !important;
+      gap: 4px !important;
+    }
+
+    #sideControlPanel {
+      flex: 0 0 25% !important;
+      min-width: 165px !important;
+      max-width: 200px !important;
+      gap: 5px !important;
+    }
+
+    /* Убираем жёсткий квадрат 1:1 на горизонтальном телефоне, чтобы карта заняла все 80% ширины */
+    .board-wrapper {
+      aspect-ratio: auto !important;
+      padding: 5px !important;
+      gap: 1.5px !important;
+      border-width: 2px !important;
+    }
+
+    /* Делаем текст на клетках крупнее, раз ширина ячеек увеличилась */
+    
+    .tile-name {
+      font-size: 8.5px !important;
+      line-height: 1.05 !important;
+    }
+    .tile-price {
+      font-size: 8px !important;
+    }
+}
+  </style>
   </style>
 </head>
 <body class="flex flex-col justify-between">
 
   <!-- ==================== ЭКРАН НАСТРОЙКИ ИГРЫ (ЛОББИ) ==================== -->
-  <div id="setupScreen" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-[#0e0b09]/92 backdrop-blur-sm">
-    <div class="parchment-card corner-ornament w-full max-w-3xl rounded-xl p-5 sm:p-8 my-auto">
-      <div class="text-center border-b border-[#8a6424]/40 pb-4 mb-4">
+    <div id="setupScreen" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-[#0e0b09]/92 backdrop-blur-sm">
+      <div class="parchment-card corner-ornament w-full max-w-3xl rounded-xl p-5 sm:p-8 my-auto">
+        <div class="text-center border-b border-[#8a6424]/40 pb-4 mb-4">
         <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded border border-[#8a6424]/50 bg-[#e2cfa8]/70 text-[#5a4634] text-xs font-semibold uppercase tracking-widest mb-2">
           <span>Мировая Экономика</span>
           <span>•</span>
@@ -2116,6 +2277,11 @@
 
       if (isLandscape) {
         const rect = container.getBoundingClientRect();
+        if (window.innerHeight <= 500) {
+          board.style.width = `${Math.floor(rect.width)}px`;
+          board.style.height = `${Math.floor(rect.height)}px`;
+          return;
+        }
         size = Math.floor(Math.min(rect.width, rect.height) - 4);
       } else {
         const maxByWidth = window.innerWidth - 10;
